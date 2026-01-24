@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: ttt_user
+      POSTGRES_PASSWORD: ttt_password
+      POSTGRES_DB: ttt_stats
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ttt_net
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://ttt_user:ttt_password@db:5432/ttt_stats
+      API_KEY: my_secret_api_key
+    depends_on:
+      - db
+    networks:
+      - ttt_net
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    networks:
+      - ttt_net
+
+volumes:
+  postgres_data:
+
+networks:
+  ttt_net:
