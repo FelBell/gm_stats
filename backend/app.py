@@ -41,6 +41,8 @@ def collect_stats():
     logging.info(f"Start Roles: {data.get('start_roles')}")
     logging.info(f"End Roles: {data.get('end_roles')}")
 
+    # TODO: Re-enable DB insertion once the schema is updated to support UUIDs and Roles
+    '''
     try:
         new_round = Round(
             server_id=None, # Removed from payload
@@ -70,6 +72,10 @@ def collect_stats():
         db.session.rollback()
         logging.error(f"Error saving stats: {e}")
         return jsonify({'error': str(e)}), 500
+    '''
+
+    # Return success for now to confirm receipt
+    return jsonify({'message': 'Stats collected successfully (LOG_ONLY)'}), 201
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
