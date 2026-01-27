@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from flask import Flask, request, jsonify, abort
 from models import db, Round, Kill
 from functools import wraps
@@ -32,7 +33,11 @@ def health():
 @app.route('/api/collect', methods=['POST'])
 @require_api_key
 def collect_stats():
-    data = request.get_json(force=True, silent=True)
+    try:
+        data = json.loads(request.data)
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid JSON'}), 400
+
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
