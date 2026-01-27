@@ -36,9 +36,16 @@ def collect_stats():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
+    # Log the new fields for verification
+    logging.info(f"Received Round UUID: {data.get('round_id')}")
+    logging.info(f"Start Roles: {data.get('start_roles')}")
+    logging.info(f"End Roles: {data.get('end_roles')}")
+
+    # TODO: Re-enable DB insertion once the schema is updated to support UUIDs and Roles
+    '''
     try:
         new_round = Round(
-            server_id=data.get('server_id'),
+            server_id=None, # Removed from payload
             map_name=data.get('map_name'),
             winner=data.get('winner'),
             duration=data.get('duration')
@@ -65,6 +72,10 @@ def collect_stats():
         db.session.rollback()
         logging.error(f"Error saving stats: {e}")
         return jsonify({'error': str(e)}), 500
+    '''
+
+    # Return success for now to confirm receipt
+    return jsonify({'message': 'Stats collected successfully (LOG_ONLY)'}), 201
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():

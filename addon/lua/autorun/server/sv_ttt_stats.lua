@@ -6,10 +6,20 @@ if not SERVER then return end
 -- ConVars
 local cv_api_url = CreateConVar("ttt_stats_api_url", "http://localhost:5000/api/collect", FCVAR_ARCHIVE, "URL of the TTT Stats API")
 local cv_api_key = CreateConVar("ttt_stats_api_key", "my_secret_api_key", FCVAR_ARCHIVE, "API Key for TTT Stats API")
-local cv_server_id = CreateConVar("ttt_stats_server_id", "server_default", FCVAR_ARCHIVE, "Identifier for this server")
+-- cv_server_id is no longer needed for payload, but keeping it if users want to keep the convar around doesn't hurt.
+-- However, plan said "Remove server_id from the payload". I'll remove the ConVar usage in payload.
 
 -- Internal State
 local current_round = {}
+
+-- Helper to generate UUID v4
+local function GenerateUUID()
+    local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+    return string.gsub(template, "[xy]", function (c)
+        local v = (c == "x") and math.random(0, 0xf) or math.random(8, 0xb)
+        return string.format("%x", v)
+    end)
+end
 
 -- Helper to get role string
 local function GetRoleName(ply)
@@ -26,13 +36,29 @@ local function GetRoleName(ply)
     return "role_" .. tostring(role)
 end
 
+-- Helper to collect all current player roles
+local function CollectPlayerRoles()
+    local roles = {}
+    for _, ply in ipairs(player.GetAll()) do
+        if IsValid(ply) then
+            table.insert(roles, {
+                player_steamid = ply:SteamID(),
+                role = GetRoleName(ply)
+            })
+        end
+    end
+    return roles
+end
+
 local function ResetRound()
     current_round = {
+        round_id = GenerateUUID(),
         kills = {},
         start_time = os.time(),
-        map = game.GetMap()
+        map = game.GetMap(),
+        start_roles = CollectPlayerRoles()
     }
-    print("[TTT Stats] Round tracking started.")
+    print("[TTT Stats] Round tracking started. ID: " .. current_round.round_id)
 end
 
 -- Hooks
@@ -97,11 +123,15 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     if result == WIN_INNOCENT then winner = "innocents" end
     if result == WIN_TIMELIMIT then winner = "timelimit" end
 
+    local end_roles = CollectPlayerRoles()
+
     local payload = {
-        server_id = cv_server_id:GetString(),
+        round_id = current_round.round_id,
         map_name = current_round.map,
         winner = winner,
         duration = duration,
+        start_roles = current_round.start_roles or {},
+        end_roles = end_roles,
         kills = current_round.kills or {}
     }
 

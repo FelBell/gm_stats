@@ -23,10 +23,22 @@ Receives round statistics.
 
 ```json
 {
-  "server_id": "server_1",
+  "round_id": "ABCD_EF01_2345_6789",
   "map_name": "ttt_minecraft_b5",
   "winner": "traitors",
   "duration": 245,
+  "start_roles": [
+    {
+      "player_steamid": "STEAM_0:1:12345",
+      "role": "innocent"
+    }
+  ],
+  "end_roles": [
+    {
+      "player_steamid": "STEAM_0:1:12345",
+      "role": "innocent"
+    }
+  ],
   "kills": [
     {
       "attacker_steamid": "STEAM_0:1:12345",
