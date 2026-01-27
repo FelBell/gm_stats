@@ -32,7 +32,7 @@ def health():
 @app.route('/api/collect', methods=['POST'])
 @require_api_key
 def collect_stats():
-    data = request.json
+    data = request.get_json(force=True, silent=True)
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
