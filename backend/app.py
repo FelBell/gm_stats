@@ -36,9 +36,14 @@ def collect_stats():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
+    # Log the new fields for verification
+    logging.info(f"Received Round UUID: {data.get('round_id')}")
+    logging.info(f"Start Roles: {data.get('start_roles')}")
+    logging.info(f"End Roles: {data.get('end_roles')}")
+
     try:
         new_round = Round(
-            server_id=data.get('server_id'),
+            server_id=None, # Removed from payload
             map_name=data.get('map_name'),
             winner=data.get('winner'),
             duration=data.get('duration')
