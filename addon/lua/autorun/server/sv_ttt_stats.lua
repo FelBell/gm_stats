@@ -137,9 +137,13 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
 
     -- Map result enum to string
     local winner = "unknown"
-    if result == WIN_TRAITOR then winner = "traitors" end
-    if result == WIN_INNOCENT then winner = "innocents" end
-    if result == WIN_TIMELIMIT then winner = "timelimit" end
+    print("[TTT Stats] Round ended with result: " .. tostring(result))
+
+    local res_num = tonumber(result)
+
+    if (WIN_TRAITOR and result == WIN_TRAITOR) or res_num == 2 then winner = "traitors" end
+    if (WIN_INNOCENT and result == WIN_INNOCENT) or res_num == 3 then winner = "innocents" end
+    if (WIN_TIMELIMIT and result == WIN_TIMELIMIT) or res_num == 4 then winner = "timelimit" end
 
     local end_roles = CollectPlayerRoles()
 
