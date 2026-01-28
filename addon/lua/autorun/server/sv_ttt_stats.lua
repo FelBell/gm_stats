@@ -54,6 +54,7 @@ local function ResetRound()
     current_round = {
         round_id = GenerateUUID(),
         kills = {},
+        buys = {},
         start_time = os.time(),
         map = game.GetMap(),
         start_roles = CollectPlayerRoles()
@@ -111,7 +112,24 @@ hook.Add("PlayerDeath", "TTTStats_PlayerDeath", function(victim, inflictor, atta
     table.insert(current_round.kills, kill_info)
 end)
 
--- 3. Round End
+-- 3. Equipment Buy
+hook.Add("TTTOrderedEquipment", "TTTStats_Buy", function(ply, equipment, is_item)
+    -- Only track if we are in a tracked round
+    if not current_round.start_time then return end
+
+    if not IsValid(ply) or not ply:IsPlayer() then return end
+
+    local buy_info = {
+        steam_id = ply:SteamID(),
+        role = GetRoleName(ply),
+        item = tostring(equipment)
+    }
+
+    if not current_round.buys then current_round.buys = {} end
+    table.insert(current_round.buys, buy_info)
+end)
+
+-- 4. Round End
 hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     if not current_round.start_time then return end
 
@@ -132,7 +150,8 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
         duration = duration,
         start_roles = current_round.start_roles or {},
         end_roles = end_roles,
-        kills = current_round.kills or {}
+        kills = current_round.kills or {},
+        buys = current_round.buys or {}
     }
 
     local json_body = util.TableToJSON(payload)
