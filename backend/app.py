@@ -1,7 +1,8 @@
 import os
 import logging
+import json
 from flask import Flask, request, jsonify, abort
-from models import db, Round, Kill
+from models import db, Round, Kill, RoundPlayer
 from functools import wraps
 
 app = Flask(__name__)
@@ -32,27 +33,53 @@ def health():
 @app.route('/api/collect', methods=['POST'])
 @require_api_key
 def collect_stats():
-    data = request.json
+    # Use json.loads(request.data) to accommodate GMod addon's potential missing headers
+    try:
+        data = json.loads(request.data)
+    except Exception as e:
+        return jsonify({'error': 'Invalid JSON'}), 400
+
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
-    # Log the new fields for verification
     logging.info(f"Received Round UUID: {data.get('round_id')}")
-    logging.info(f"Start Roles: {data.get('start_roles')}")
-    logging.info(f"End Roles: {data.get('end_roles')}")
 
-    # TODO: Re-enable DB insertion once the schema is updated to support UUIDs and Roles
-    '''
     try:
         new_round = Round(
-            server_id=None, # Removed from payload
+            id=data.get('round_id'),
             map_name=data.get('map_name'),
             winner=data.get('winner'),
             duration=data.get('duration')
         )
         db.session.add(new_round)
-        db.session.flush() # Get ID to use in foreign keys
 
+        # Process Roles
+        players_dict = {}
+
+        # Start roles
+        for p in data.get('start_roles', []):
+            sid = p.get('player_steamid')
+            if sid:
+                players_dict[sid] = {'steam_id': sid, 'role_start': p.get('role')}
+
+        # End roles
+        for p in data.get('end_roles', []):
+            sid = p.get('player_steamid')
+            if sid:
+                if sid not in players_dict:
+                    players_dict[sid] = {'steam_id': sid}
+                players_dict[sid]['role_end'] = p.get('role')
+
+        for p_data in players_dict.values():
+            new_player = RoundPlayer(
+                round_id=new_round.id,
+                steam_id=p_data['steam_id'],
+                role_start=p_data.get('role_start'),
+                role_end=p_data.get('role_end')
+            )
+            db.session.add(new_player)
+
+        # Process Kills
         if 'kills' in data and isinstance(data['kills'], list):
             for k in data['kills']:
                 new_kill = Kill(
@@ -72,10 +99,6 @@ def collect_stats():
         db.session.rollback()
         logging.error(f"Error saving stats: {e}")
         return jsonify({'error': str(e)}), 500
-    '''
-
-    # Return success for now to confirm receipt
-    return jsonify({'message': 'Stats collected successfully (LOG_ONLY)'}), 201
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():

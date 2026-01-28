@@ -8,3 +8,8 @@ venv/
 .idea/
 .vscode/
 postgres_data/
+
+*.db
+*.sqlite
+instance/
+*.log
