@@ -40,6 +40,14 @@ Records every kill event within a round.
 - `weapon` (String(64)): Weapon class used.
 - `headshot` (Boolean): True if it was a headshot.
 
+### `round_buys`
+Records equipment purchases during a round.
+- `id` (Integer, PK): Internal ID.
+- `round_id` (String(36), FK): Reference to `rounds.id`.
+- `steam_id` (String(64)): Player's SteamID.
+- `role` (String(32)): Role of the player at the time of purchase.
+- `item` (String(64)): Item identifier or weapon class.
+
 ## Endpoints
 
 ### POST `/api/collect`
@@ -78,6 +86,13 @@ Receives round statistics.
       "victim_role": "innocent",
       "weapon": "weapon_ttt_knife",
       "headshot": false
+    }
+  ],
+  "buys": [
+    {
+      "steam_id": "STEAM_0:1:12345",
+      "role": "traitor",
+      "item": "weapon_ttt_c4"
     }
   ]
 }
