@@ -1,8 +1,13 @@
 import os
+import sys
 import logging
 import json
+
+# Add the 'backend' directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 from flask import Flask, request, jsonify, abort
-from models import db, Round, Kill, RoundPlayer, RoundBuy
+from models import db, Round, Kill, RoundPlayer, RoundBuy, Player
 from functools import wraps
 
 app = Flask(__name__)
@@ -140,6 +145,34 @@ def get_stats():
 
     rounds = Round.query.order_by(Round.timestamp.desc()).offset(offset).limit(limit).all()
     return jsonify([r.to_dict() for r in rounds])
+
+@app.route('/api/player/update', methods=['POST'])
+@require_api_key
+def update_player():
+    try:
+        data = json.loads(request.data)
+        steam_id = data.get('steam_id')
+        display_name = data.get('display_name')
+
+        if not steam_id or not display_name:
+            return jsonify({'error': 'Missing steam_id or display_name'}), 400
+
+        player = Player.query.get(steam_id)
+        if player:
+            # Update existing player
+            player.display_name = display_name
+            db.session.commit()
+            return jsonify({'message': 'Player updated successfully'}), 200
+        else:
+            # Create new player
+            new_player = Player(steam_id=steam_id, display_name=display_name)
+            db.session.add(new_player)
+            db.session.commit()
+            return jsonify({'message': 'Player created successfully'}), 201
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating player: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():
