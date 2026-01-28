@@ -70,7 +70,7 @@ local function CollectPlayerInfo()
             table.insert(players, {
                 player_steamid = ply:SteamID(),
                 role = GetRoleName(ply),
-                karma = ply:GetKarma(),
+                karma = ply:Karma(),
                 points = ply:GetScore()
             })
         end
