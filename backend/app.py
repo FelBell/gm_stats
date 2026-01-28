@@ -2,7 +2,7 @@ import os
 import logging
 import json
 from flask import Flask, request, jsonify, abort
-from models import db, Round, Kill, RoundPlayer
+from models import db, Round, Kill, RoundPlayer, RoundBuy
 from functools import wraps
 
 app = Flask(__name__)
@@ -92,6 +92,17 @@ def collect_stats():
                     headshot=k.get('headshot', False)
                 )
                 db.session.add(new_kill)
+
+        # Process Buys
+        if 'buys' in data and isinstance(data['buys'], list):
+            for b in data['buys']:
+                new_buy = RoundBuy(
+                    round_id=new_round.id,
+                    steam_id=b.get('steam_id'),
+                    role=b.get('role'),
+                    item=b.get('item')
+                )
+                db.session.add(new_buy)
 
         db.session.commit()
         return jsonify({'message': 'Stats collected successfully', 'round_id': new_round.id}), 201

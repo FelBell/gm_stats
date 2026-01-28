@@ -25,6 +25,7 @@ class Round(db.Model):
 
     kills = db.relationship('Kill', backref='round', lazy=True)
     players = db.relationship('RoundPlayer', backref='round', lazy=True)
+    buys = db.relationship('RoundBuy', backref='round', lazy=True)
 
     def to_dict(self):
         """Returns a dictionary representation of the Round."""
@@ -35,7 +36,34 @@ class Round(db.Model):
             'duration': self.duration,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
             'kills': [k.to_dict() for k in self.kills],
-            'players': [p.to_dict() for p in self.players]
+            'players': [p.to_dict() for p in self.players],
+            'buys': [b.to_dict() for b in self.buys]
+        }
+
+class RoundBuy(db.Model):
+    """
+    Represents an equipment buy during a round.
+
+    Attributes:
+        id (int): Database ID.
+        round_id (str): Foreign key linking to the Round UUID.
+        steam_id (str): SteamID of the player who bought the item.
+        role (str): Role of the player when they bought the item.
+        item (str): The item or weapon identifier bought.
+    """
+    __tablename__ = 'round_buys'
+    id = db.Column(db.Integer, primary_key=True)
+    round_id = db.Column(db.String(36), db.ForeignKey('rounds.id'), nullable=False)
+    steam_id = db.Column(db.String(64), nullable=False)
+    role = db.Column(db.String(32))
+    item = db.Column(db.String(64))
+
+    def to_dict(self):
+        """Returns a dictionary representation of the RoundBuy."""
+        return {
+            'steam_id': self.steam_id,
+            'role': self.role,
+            'item': self.item
         }
 
 class RoundPlayer(db.Model):

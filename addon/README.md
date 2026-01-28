@@ -13,11 +13,11 @@ Add the following lines to your `server.cfg`:
 ```cfg
 ttt_stats_api_url "http://<YOUR_API_IP>:5000/api/collect"
 ttt_stats_api_key "your_secret_key"
-ttt_stats_server_id "my_ttt_server_1"
 ```
 
 ## Features
 
 - Tracks Round Winner, Duration, Map.
 - Tracks Kills (Attacker, Victim, Roles, Weapon, Headshot).
+- Tracks Equipment Buys (Player, Role, Item).
 - Sends data via HTTP POST at end of round.
