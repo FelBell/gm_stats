@@ -33,9 +33,10 @@ def health():
 @app.route('/api/collect', methods=['POST'])
 @require_api_key
 def collect_stats():
+    # Use json.loads(request.data) to accommodate GMod addon's potential missing headers
     try:
         data = json.loads(request.data)
-    except json.JSONDecodeError:
+    except Exception as e:
         return jsonify({'error': 'Invalid JSON'}), 400
 
     if not data:

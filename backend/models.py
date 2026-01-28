@@ -4,6 +4,18 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class Round(db.Model):
+    """
+    Represents a TTT round.
+
+    Attributes:
+        id (str): UUIDv4 string serving as the primary key.
+        map_name (str): Name of the map played.
+        winner (str): Winning team (e.g., 'traitors', 'innocents', 'timelimit').
+        duration (int): Duration of the round in seconds.
+        timestamp (datetime): UTC timestamp when the round data was recorded.
+        kills (List[Kill]): List of kills that occurred during the round.
+        players (List[RoundPlayer]): List of players who participated in the round.
+    """
     __tablename__ = 'rounds'
     id = db.Column(db.String(36), primary_key=True)
     map_name = db.Column(db.String(128))
@@ -15,6 +27,7 @@ class Round(db.Model):
     players = db.relationship('RoundPlayer', backref='round', lazy=True)
 
     def to_dict(self):
+        """Returns a dictionary representation of the Round."""
         return {
             'id': self.id,
             'map_name': self.map_name,
@@ -26,6 +39,16 @@ class Round(db.Model):
         }
 
 class RoundPlayer(db.Model):
+    """
+    Represents a player's participation in a round, tracking their start and end roles.
+
+    Attributes:
+        id (int): Database ID.
+        round_id (str): Foreign key linking to the Round UUID.
+        steam_id (str): SteamID of the player.
+        role_start (str): Role at the beginning of the round.
+        role_end (str): Role at the end of the round.
+    """
     __tablename__ = 'round_players'
     id = db.Column(db.Integer, primary_key=True)
     round_id = db.Column(db.String(36), db.ForeignKey('rounds.id'), nullable=False)
@@ -34,6 +57,7 @@ class RoundPlayer(db.Model):
     role_end = db.Column(db.String(32))
 
     def to_dict(self):
+        """Returns a dictionary representation of the RoundPlayer."""
         return {
             'steam_id': self.steam_id,
             'role_start': self.role_start,
@@ -41,6 +65,19 @@ class RoundPlayer(db.Model):
         }
 
 class Kill(db.Model):
+    """
+    Represents a kill event during a round.
+
+    Attributes:
+        id (int): Database ID.
+        round_id (str): Foreign key linking to the Round UUID.
+        attacker_steamid (str): SteamID of the attacker (can be None for world deaths).
+        attacker_role (str): Role of the attacker.
+        victim_steamid (str): SteamID of the victim.
+        victim_role (str): Role of the victim.
+        weapon (str): Weapon or entity class used for the kill.
+        headshot (bool): Whether the kill was a headshot.
+    """
     __tablename__ = 'kills'
     id = db.Column(db.Integer, primary_key=True)
     round_id = db.Column(db.String(36), db.ForeignKey('rounds.id'), nullable=False)
@@ -53,6 +90,7 @@ class Kill(db.Model):
     headshot = db.Column(db.Boolean, default=False)
 
     def to_dict(self):
+        """Returns a dictionary representation of the Kill."""
         return {
             'attacker_steamid': self.attacker_steamid,
             'attacker_role': self.attacker_role,
