@@ -60,7 +60,12 @@ def collect_stats():
         for p in data.get('start_roles', []):
             sid = p.get('player_steamid')
             if sid:
-                players_dict[sid] = {'steam_id': sid, 'role_start': p.get('role')}
+                players_dict[sid] = {
+                    'steam_id': sid,
+                    'role_start': p.get('role'),
+                    'karma_start': p.get('karma'),
+                    'points_start': p.get('points')
+                }
 
         # End roles
         for p in data.get('end_roles', []):
@@ -69,13 +74,29 @@ def collect_stats():
                 if sid not in players_dict:
                     players_dict[sid] = {'steam_id': sid}
                 players_dict[sid]['role_end'] = p.get('role')
+                players_dict[sid]['karma_end'] = p.get('karma')
+                players_dict[sid]['points_end'] = p.get('points')
 
         for p_data in players_dict.values():
+            karma_start = p_data.get('karma_start')
+            karma_end = p_data.get('karma_end')
+            points_start = p_data.get('points_start')
+            points_end = p_data.get('points_end')
+
+            karma_diff = None
+            if karma_start is not None and karma_end is not None:
+                karma_diff = karma_end - karma_start
+
+            points_diff = None
+            if points_start is not None and points_end is not None:
+                points_diff = points_end - points_start
             new_player = RoundPlayer(
                 round_id=new_round.id,
                 steam_id=p_data['steam_id'],
                 role_start=p_data.get('role_start'),
-                role_end=p_data.get('role_end')
+                role_end=p_data.get('role_end'),
+                karma_diff=karma_diff,
+                points_diff=points_diff
             )
             db.session.add(new_player)
 

@@ -62,17 +62,20 @@ local function GetRoleName(ply)
 end
 
 -- Helper to collect all current player roles
-local function CollectPlayerRoles()
-    local roles = {}
+-- Helper to collect all current player info (roles, karma, points)
+local function CollectPlayerInfo()
+    local players = {}
     for _, ply in ipairs(player.GetAll()) do
         if IsValid(ply) then
-            table.insert(roles, {
+            table.insert(players, {
                 player_steamid = ply:SteamID(),
-                role = GetRoleName(ply)
+                role = GetRoleName(ply),
+                karma = ply:GetKarma(),
+                points = ply:GetScore()
             })
         end
     end
-    return roles
+    return players
 end
 
 local function ResetRound()
@@ -82,7 +85,7 @@ local function ResetRound()
         buys = {},
         start_time = os.time(),
         map = game.GetMap(),
-        start_roles = CollectPlayerRoles()
+        start_player_info = CollectPlayerInfo()
     }
     print("[TTT Stats] Round tracking started. ID: " .. current_round.round_id)
 end
@@ -171,15 +174,15 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     if (WIN_TIMELIMIT and result == WIN_TIMELIMIT) or res_num == 4 then winner = "timelimit" end
     if WIN_JACKAL and result == WIN_JACKAL then winner = "jackal" end
 
-    local end_roles = CollectPlayerRoles()
+    local end_player_info = CollectPlayerInfo()
 
     local payload = {
         round_id = current_round.round_id,
         map_name = current_round.map,
         winner = winner,
         duration = duration,
-        start_roles = current_round.start_roles or {},
-        end_roles = end_roles,
+        start_roles = current_round.start_player_info or {},
+        end_roles = end_player_info,
         kills = current_round.kills or {},
         buys = current_round.buys or {}
     }

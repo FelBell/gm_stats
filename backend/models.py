@@ -83,13 +83,17 @@ class RoundPlayer(db.Model):
     steam_id = db.Column(db.String(64), nullable=False)
     role_start = db.Column(db.String(32))
     role_end = db.Column(db.String(32))
+    karma_diff = db.Column(db.Integer)
+    points_diff = db.Column(db.Integer)
 
     def to_dict(self):
         """Returns a dictionary representation of the RoundPlayer."""
         return {
             'steam_id': self.steam_id,
             'role_start': self.role_start,
-            'role_end': self.role_end
+            'role_end': self.role_end,
+            'karma_diff': self.karma_diff,
+            'points_diff': self.points_diff
         }
 
 class Kill(db.Model):
