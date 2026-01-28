@@ -80,7 +80,7 @@ hook.Add("PlayerDeath", "TTTStats_PlayerDeath", function(victim, inflictor, atta
     local kill_info = {
         victim_steamid = victim:SteamID(),
         victim_role = GetRoleName(victim),
-        headshot = (victim.LastHitGroup == HITGROUP_HEAD)
+        headshot = (victim:LastHitGroup() == HITGROUP_HEAD)
     }
 
     if IsValid(attacker) and attacker:IsPlayer() then
