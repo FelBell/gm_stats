@@ -54,6 +54,8 @@ local function GetRoleName(ply)
     if role == ROLE_TRAITOR then return "traitor" end
     if role == ROLE_DETECTIVE then return "detective" end
     if role == ROLE_INNOCENT then return "innocent" end
+    if ROLE_JACKAL and role == ROLE_JACKAL then return "jackal" end
+    if ROLE_SIDEKICK and role == ROLE_SIDEKICK then return "sidekick" end
 
     -- Fallback for custom roles or unknown
     return "role_" .. tostring(role)
@@ -167,6 +169,7 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     if (WIN_TRAITOR and result == WIN_TRAITOR) or res_num == 2 then winner = "traitors" end
     if (WIN_INNOCENT and result == WIN_INNOCENT) or res_num == 3 then winner = "innocents" end
     if (WIN_TIMELIMIT and result == WIN_TIMELIMIT) or res_num == 4 then winner = "timelimit" end
+    if WIN_JACKAL and result == WIN_JACKAL then winner = "jackal" end
 
     local end_roles = CollectPlayerRoles()
 
