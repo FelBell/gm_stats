@@ -12,6 +12,29 @@ local cv_api_key = CreateConVar("ttt_stats_api_key", "my_secret_api_key", FCVAR_
 -- Internal State
 local current_round = {}
 
+-- Mapping for vanilla TTT item IDs to names
+local vanilla_item_map = {
+    [1] = "Armor",
+    [2] = "Radar",
+    [3] = "Defuser",
+    [4] = "Flare Gun",
+    [5] = "Health Station",
+    [6] = "Knife",
+    [7] = "C4",
+    [8] = "Disguiser"
+}
+
+-- Helper to get item name
+local function GetItemName(equipment, is_item)
+    if is_item then
+        -- It's a numerical ID for a vanilla item
+        return vanilla_item_map[equipment] or "item_" .. tostring(equipment)
+    else
+        -- It's a weapon class string
+        return tostring(equipment)
+    end
+end
+
 -- Helper to generate UUID v4
 local function GenerateUUID()
     local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
@@ -122,7 +145,7 @@ hook.Add("TTTOrderedEquipment", "TTTStats_Buy", function(ply, equipment, is_item
     local buy_info = {
         steam_id = ply:SteamID(),
         role = GetRoleName(ply),
-        item = tostring(equipment)
+        item = GetItemName(equipment, is_item)
     }
 
     if not current_round.buys then current_round.buys = {} end
