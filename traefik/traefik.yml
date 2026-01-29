@@ -1,0 +1,33 @@
+# traefik.yml
+
+# API and dashboard configuration
+api:
+  dashboard: true
+  insecure: true # Don't do this in production
+
+# Entrypoints configuration
+entryPoints:
+  web:
+    address: ":80"
+    # Redirect all HTTP traffic to HTTPS
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+
+# Providers configuration
+providers:
+  docker:
+    exposedByDefault: false
+
+# Certificates resolvers configuration
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: your_email@your_domain.com
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
