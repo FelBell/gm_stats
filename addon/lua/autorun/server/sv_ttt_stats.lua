@@ -62,7 +62,8 @@ local function GetRoleName(ply)
 end
 
 -- Helper to collect all current player roles
--- Helper to collect all current player info (roles, karma, points)
+-- Helper to collect all current player info (roles, karma, points).
+-- This function is called at the start and end of each round to capture player stats.
 local function CollectPlayerInfo()
     local players = {}
     for _, ply in ipairs(player.GetAll()) do
@@ -70,8 +71,8 @@ local function CollectPlayerInfo()
             table.insert(players, {
                 player_steamid = ply:SteamID(),
                 role = GetRoleName(ply),
-                karma = ply:Karma(),
-                points = ply:GetScore()
+                karma = ply:GetLiveKarma(),
+                points = ply:GetFrags()
             })
         end
     end
@@ -158,6 +159,9 @@ hook.Add("TTTOrderedEquipment", "TTTStats_Buy", function(ply, equipment, is_item
 end)
 
 -- 4. Round End
+-- This hook captures the state at the end of the round.
+-- It collects final player information (including karma and score),
+-- determines the round winner, and sends the complete dataset to the backend API.
 hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     if not current_round.start_time then return end
 
