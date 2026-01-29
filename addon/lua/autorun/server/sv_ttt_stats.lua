@@ -28,7 +28,7 @@ local vanilla_item_map = {
 local function GetItemName(equipment, is_item)
     if is_item then
         -- It's a numerical ID for a vanilla item
-        return vanilla_item_map[equipment] or "item_" .. tostring(equipment)
+        return vanilla_item_map[equipment] or tostring(equipment)
     else
         -- It's a weapon class string
         return tostring(equipment)
