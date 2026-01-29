@@ -4,7 +4,7 @@
 if not SERVER then return end
 
 -- ConVars
-local cv_api_url = CreateConVar("ttt_stats_api_url", "http://localhost:5000/api/collect", FCVAR_ARCHIVE, "URL of the TTT Stats API")
+local cv_api_url = CreateConVar("ttt_stats_api_url", "https://ttt.fbell.de/api", FCVAR_ARCHIVE, "Base URL of the TTT Stats API")
 local cv_api_key = CreateConVar("ttt_stats_api_key", "my_secret_api_key", FCVAR_ARCHIVE, "API Key for TTT Stats API")
 -- cv_server_id is no longer needed for payload, but keeping it if users want to keep the convar around doesn't hurt.
 -- However, plan said "Remove server_id from the payload". I'll remove the ConVar usage in payload.
@@ -184,9 +184,10 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     }
 
     local json_body = util.TableToJSON(payload)
-    local api_url = cv_api_url:GetString()
+    local base_api_url = cv_api_url:GetString()
+    local collect_api_url = base_api_url:gsub("/$", "") .. "/collect"
 
-    print("[TTT Stats] Sending round data to " .. api_url)
+    print("[TTT Stats] Sending round data to " .. collect_api_url)
 
     HTTP({
         failed = function(reason)
@@ -196,7 +197,7 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
             print("[TTT Stats] HTTP Request Success: " .. code)
         end,
         method = "POST",
-        url = api_url,
+        url = collect_api_url,
         body = json_body,
         headers = {
             ["Content-Type"] = "application/json",
