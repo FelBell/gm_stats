@@ -46,9 +46,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    environment:
+      - DOMAIN=your_domain.com
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+      - ./certbot:/etc/certbot
     networks:
       - ttt_net
     depends_on:
@@ -59,9 +62,11 @@ services:
 
   certbot:
     image: certbot/certbot
+    command: renew --quiet
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+      - ./certbot:/etc/certbot
     networks:
       - ttt_net
 
