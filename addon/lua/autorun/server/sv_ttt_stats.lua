@@ -167,16 +167,8 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
 
     local duration = os.time() - current_round.start_time
 
-    -- Map result enum to string
-    local winner = "unknown"
-    print("[TTT Stats] Round ended with result: " .. tostring(result))
-
-    local res_num = tonumber(result)
-
-    if (WIN_TRAITOR and result == WIN_TRAITOR) or res_num == 2 then winner = "traitors" end
-    if (WIN_INNOCENT and result == WIN_INNOCENT) or res_num == 3 then winner = "innocents" end
-    if (WIN_TIMELIMIT and result == WIN_TIMELIMIT) or res_num == 4 then winner = "timelimit" end
-    if WIN_JACKAL and result == WIN_JACKAL then winner = "jackal" end
+    local winner = tostring(result)
+    print("[TTT Stats] Round ended with result: " .. winner)
 
     local end_player_info = CollectPlayerInfo()
 
