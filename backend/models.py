@@ -131,3 +131,20 @@ class Kill(db.Model):
             'weapon': self.weapon,
             'headshot': self.headshot
         }
+
+class Player(db.Model):
+    """
+    Represents a unique player.
+    Attributes:
+        steam_id (str): The player's SteamID, serving as the primary key.
+        display_name (str): The player's last known display name.
+    """
+    __tablename__ = 'players'
+    steam_id = db.Column(db.String(64), primary_key=True)
+    display_name = db.Column(db.String(128), nullable=False)
+    def to_dict(self):
+        """Returns a dictionary representation of the Player."""
+        return {
+            'steam_id': self.steam_id,
+            'display_name': self.display_name
+        }

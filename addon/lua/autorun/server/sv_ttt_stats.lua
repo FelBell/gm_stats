@@ -212,4 +212,38 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
     current_round = {}
 end)
 
+hook.Add("PlayerInitialSpawn", "TTTStats_PlayerInitialSpawn", function(ply)
+    if not IsValid(ply) or not ply:IsPlayer() then return end
+
+    local payload = {
+        steam_id = ply:SteamID(),
+        display_name = ply:Nick()
+    }
+
+    local json_body = util.TableToJSON(payload)
+    -- Construct the player update URL from the base API URL
+    local base_api_url = cv_api_url:GetString()
+    -- Ensure the base URL doesn't have a trailing slash, then append the new path
+    local player_api_url = base_api_url:gsub("/$", "") .. "/player/update"
+
+
+    print("[TTT Stats] Sending player data to " .. player_api_url)
+
+    HTTP({
+        failed = function(reason)
+            print("[TTT Stats] Player update HTTP Request Failed: " .. reason)
+        end,
+        success = function(code, body, headers)
+            print("[TTT Stats] Player update HTTP Request Success: " .. code)
+        end,
+        method = "POST",
+        url = player_api_url,
+        body = json_body,
+        headers = {
+            ["Content-Type"] = "application/json",
+            ["X-Api-Key"] = cv_api_key:GetString()
+        }
+    })
+end)
+
 print("[TTT Stats] Addon Loaded.")

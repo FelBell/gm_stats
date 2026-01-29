@@ -48,7 +48,29 @@ Records equipment purchases during a round.
 - `role` (String(32)): Role of the player at the time of purchase.
 - `item` (String(64)): Item identifier or weapon class.
 
+### `players`
+Stores unique player information.
+- `steam_id` (String(64), PK): The player's unique SteamID.
+- `display_name` (String(128)): The player's last known display name.
+
 ## Endpoints
+
+### POST `/api/player/update`
+
+Creates or updates a player's display name. This is intended to be called when a player joins the server to keep their name up-to-date.
+
+**Headers:**
+- `Content-Type: application/json`
+- `X-Api-Key: <YOUR_API_KEY>`
+
+**Payload:**
+
+```json
+{
+  "steam_id": "STEAM_0:1:12345",
+  "display_name": "PlayerName"
+}
+```
 
 ### POST `/api/collect`
 
