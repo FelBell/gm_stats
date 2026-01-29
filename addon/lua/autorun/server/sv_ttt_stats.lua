@@ -24,6 +24,14 @@ local vanilla_item_map = {
     [8] = "Disguiser"
 }
 
+-- Helper to format the base URL by removing any trailing slash
+local function FormatBaseURL(url)
+    if string.sub(url, -1) == "/" then
+        return string.sub(url, 1, -2)
+    end
+    return url
+end
+
 -- Helper to get item name
 local function GetItemName(equipment, is_item)
     if is_item then
@@ -185,7 +193,7 @@ hook.Add("TTTEndRound", "TTTStats_EndRound", function(result)
 
     local json_body = util.TableToJSON(payload)
     local base_api_url = cv_api_url:GetString()
-    local collect_api_url = base_api_url:gsub("/$", "") .. "/collect"
+    local collect_api_url = FormatBaseURL(base_api_url) .. "/collect"
 
     print("[TTT Stats] Sending round data to " .. collect_api_url)
 
@@ -221,7 +229,7 @@ hook.Add("PlayerInitialSpawn", "TTTStats_PlayerInitialSpawn", function(ply)
     -- Construct the player update URL from the base API URL
     local base_api_url = cv_api_url:GetString()
     -- Ensure the base URL doesn't have a trailing slash, then append the new path
-    local player_api_url = base_api_url:gsub("/$", "") .. "/player/update"
+    local player_api_url = FormatBaseURL(base_api_url) .. "/player/update"
 
 
     print("[TTT Stats] Sending player data to " .. player_api_url)
