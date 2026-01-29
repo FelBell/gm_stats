@@ -13,3 +13,6 @@ postgres_data/
 *.sqlite
 instance/
 *.log
+
+# Ignore Traefik acme.json
+traefik/acme.json

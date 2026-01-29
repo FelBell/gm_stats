@@ -65,9 +65,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - "./traefik.yml:/etc/traefik/traefik.yml"
+      - "./traefik/traefik.yml:/etc/traefik/traefik.yml"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./acme.json:/acme.json"
+      - "./traefik/acme.json:/acme.json"
     networks:
       - ttt_net
     restart: unless-stopped
