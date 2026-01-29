@@ -11,23 +11,21 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - ttt_net
+    restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: root
-    ports:
-      - "5050:80"
     depends_on:
       - db
     networks:
       - ttt_net
+    restart: unless-stopped
 
   backend:
     build: ./backend
-    ports:
-      - "5000:5000"
     environment:
       DATABASE_URL: postgresql://ttt_user:ttt_password@db:5432/ttt_stats
       API_KEY: my_secret_api_key
@@ -35,11 +33,35 @@ services:
       - db
     networks:
       - ttt_net
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
+    networks:
+      - ttt_net
+    restart: unless-stopped
+
+  nginx:
+    build: ./nginx
     ports:
-      - "8080:80"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    networks:
+      - ttt_net
+    depends_on:
+      - backend
+      - frontend
+      - pgadmin
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
     networks:
       - ttt_net
 
