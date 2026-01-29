@@ -1,0 +1,261 @@
+<div class="dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <h1 class="logo">
+        <span class="logo-icon">🔫</span>
+        TTT Stats
+      </h1>
+      <div class="header-actions">
+        <a routerLink="/statistics" class="btn btn-stats">
+          <span class="btn-icon">📊</span>
+          Statistiken
+        </a>
+        <div
+          class="api-status"
+          [class.healthy]="apiHealthy() === true"
+          [class.unhealthy]="apiHealthy() === false"
+        >
+          <span class="status-dot"></span>
+          {{
+            apiHealthy() === true
+              ? 'API Online'
+              : apiHealthy() === false
+                ? 'API Offline'
+                : 'Prüfe...'
+          }}
+        </div>
+        <button class="btn btn-refresh" (click)="refresh()" [disabled]="loading()">
+          <span class="btn-icon">🔄</span>
+          Aktualisieren
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Overview -->
+  <section class="stats-overview">
+    <div class="stat-card">
+      <div class="stat-icon">🎮</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalRounds() }}</span>
+        <span class="stat-label">Runden</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💀</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ totalKills() }}</span>
+        <span class="stat-label">Kills</span>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-content">
+        <span class="stat-value">{{ headshotRate() }}%</span>
+        <span class="stat-label">Headshot Rate</span>
+      </div>
+    </div>
+    <div class="stat-card winner-stats">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-content">
+        <div class="winner-breakdown">
+          <span class="winner-innocent">{{ winStats().innocent }} Innocent</span>
+          <span class="winner-traitor">{{ winStats().traitor }} Traitor</span>
+          @if (winStats().other > 0) {
+            <span class="winner-other">{{ winStats().other }} Andere</span>
+          }
+        </div>
+        <span class="stat-label">Siege</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  @if (loading() && rounds().length === 0) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Lade Statistiken...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <p>{{ error() }}</p>
+      <button class="btn btn-primary" (click)="refresh()">Erneut versuchen</button>
+    </div>
+  }
+
+  <!-- Rounds List -->
+  @if (!loading() || rounds().length > 0) {
+    <section class="rounds-section">
+      <h2 class="section-title">Letzte Runden</h2>
+
+      @if (rounds().length === 0 && !loading()) {
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <p>Noch keine Runden aufgezeichnet.</p>
+        </div>
+      }
+
+      <div class="rounds-grid">
+        @for (round of rounds(); track trackByRoundId($index, round)) {
+          <div class="round-card" (click)="selectRound(round)">
+            <div class="round-header">
+              <span class="round-map">{{ round.map_name || 'Unbekannte Map' }}</span>
+              <span class="round-winner" [ngClass]="getWinnerClass(round.winner)">
+                {{ getWinnerLabel(round.winner) }}
+              </span>
+            </div>
+            <div class="round-meta">
+              <span class="round-duration">⏱️ {{ formatDuration(round.duration) }}</span>
+              <span class="round-timestamp">📅 {{ formatTimestamp(round.timestamp) }}</span>
+            </div>
+            <div class="round-stats">
+              <span class="round-stat">
+                <span class="stat-emoji">👥</span>
+                {{ round.players.length }} Spieler
+              </span>
+              <span class="round-stat">
+                <span class="stat-emoji">💀</span>
+                {{ round.kills.length }} Kills
+              </span>
+              @if (round.buys.length > 0) {
+                <span class="round-stat">
+                  <span class="stat-emoji">🛒</span>
+                  {{ round.buys.length }} Käufe
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (hasMore() && !loading()) {
+        <div class="load-more">
+          <button class="btn btn-secondary" (click)="loadMore()">Mehr laden</button>
+        </div>
+      }
+
+      @if (loading() && rounds().length > 0) {
+        <div class="loading-more">
+          <div class="spinner small"></div>
+          <span>Lade mehr...</span>
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<!-- Round Detail Modal -->
+@if (selectedRound()) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeDetail()">✕</button>
+
+      <div class="modal-header">
+        <h2>{{ selectedRound()!.map_name || 'Unbekannte Map' }}</h2>
+        <span class="modal-winner" [ngClass]="getWinnerClass(selectedRound()!.winner)">
+          {{ getWinnerLabel(selectedRound()!.winner) }}
+        </span>
+      </div>
+
+      <div class="modal-meta">
+        <span>⏱️ Dauer: {{ formatDuration(selectedRound()!.duration) }}</span>
+        <span>📅 {{ formatTimestamp(selectedRound()!.timestamp) }}</span>
+      </div>
+
+      <!-- Players Tab -->
+      <div class="modal-section">
+        <h3>👥 Spieler ({{ selectedRound()!.players.length }})</h3>
+        <div class="players-table">
+          <div class="table-header">
+            <span>Steam ID</span>
+            <span>Start Rolle</span>
+            <span>End Rolle</span>
+            <span>Karma</span>
+            <span>Punkte</span>
+          </div>
+          @for (player of selectedRound()!.players; track trackByPlayerSteamId($index, player)) {
+            <div class="table-row">
+              <span class="steam-id">{{ formatSteamId(player.steam_id) }}</span>
+              <span class="role" [ngClass]="getRoleClass(player.role_start)">
+                {{ player.role_start || '-' }}
+              </span>
+              <span class="role" [ngClass]="getRoleClass(player.role_end)">
+                {{ player.role_end || '-' }}
+              </span>
+              <span
+                class="karma"
+                [class.positive]="player.karma_diff !== null && player.karma_diff > 0"
+                [class.negative]="player.karma_diff !== null && player.karma_diff < 0"
+              >
+                {{
+                  player.karma_diff !== null
+                    ? (player.karma_diff > 0 ? '+' : '') + player.karma_diff
+                    : '-'
+                }}
+              </span>
+              <span
+                class="points"
+                [class.positive]="player.points_diff !== null && player.points_diff > 0"
+                [class.negative]="player.points_diff !== null && player.points_diff < 0"
+              >
+                {{
+                  player.points_diff !== null
+                    ? (player.points_diff > 0 ? '+' : '') + player.points_diff
+                    : '-'
+                }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Kills Tab -->
+      @if (selectedRound()!.kills.length > 0) {
+        <div class="modal-section">
+          <h3>💀 Kills ({{ selectedRound()!.kills.length }})</h3>
+          <div class="kills-list">
+            @for (kill of selectedRound()!.kills; track trackByKillIndex($index, kill)) {
+              <div class="kill-item">
+                <span class="killer" [ngClass]="getRoleClass(kill.attacker_role)">
+                  {{ formatSteamId(kill.attacker_steamid) }}
+                  <small>{{ kill.attacker_role || '?' }}</small>
+                </span>
+                <span class="kill-arrow">
+                  {{ kill.headshot ? '🎯' : '→' }}
+                </span>
+                <span class="victim" [ngClass]="getRoleClass(kill.victim_role)">
+                  {{ formatSteamId(kill.victim_steamid) }}
+                  <small>{{ kill.victim_role || '?' }}</small>
+                </span>
+                <span class="weapon">{{ kill.weapon || 'Unbekannt' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Buys Tab -->
+      @if (selectedRound()!.buys.length > 0) {
+        <div class="modal-section">
+          <h3>🛒 Käufe ({{ selectedRound()!.buys.length }})</h3>
+          <div class="buys-list">
+            @for (buy of selectedRound()!.buys; track trackByBuyIndex($index, buy)) {
+              <div class="buy-item">
+                <span class="buyer" [ngClass]="getRoleClass(buy.role)">
+                  {{ formatSteamId(buy.steam_id) }}
+                  <small>{{ buy.role || '?' }}</small>
+                </span>
+                <span class="item-bought">{{ buy.item }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

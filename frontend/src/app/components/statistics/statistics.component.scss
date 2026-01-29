@@ -1,0 +1,888 @@
+// Variables
+$color-bg: #0f0f13;
+$color-bg-card: #1a1a24;
+$color-bg-hover: #252532;
+$color-border: #2a2a3a;
+$color-text: #e4e4eb;
+$color-text-secondary: #9090a0;
+$color-accent: #6366f1;
+$color-innocent: #4ade80;
+$color-traitor: #f87171;
+$color-jester: #fbbf24;
+$color-independent: #a78bfa;
+$color-timelimit: #94a3b8;
+
+.statistics {
+  min-height: 100vh;
+  background: $color-bg;
+  color: $color-text;
+  padding-bottom: 4rem;
+}
+
+// Header
+.header {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%);
+  border-bottom: 1px solid $color-border;
+  padding: 1.5rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.header-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.back-link {
+  color: $color-text-secondary;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $color-accent;
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, $color-accent, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  .logo-icon {
+    font-size: 2rem;
+    -webkit-text-fill-color: initial;
+  }
+}
+
+// Buttons
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-refresh {
+  background: $color-bg-card;
+  color: $color-text;
+  border: 1px solid $color-border;
+
+  &:hover:not(:disabled) {
+    background: $color-bg-hover;
+    border-color: $color-accent;
+  }
+}
+
+.btn-primary {
+  background: $color-accent;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $color-accent 80%, white);
+  }
+}
+
+// Loading & Error States
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: $color-text-secondary;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid $color-border;
+  border-top-color: $color-accent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+// Global Stats Overview
+.global-stats {
+  max-width: 1600px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $color-accent;
+  }
+
+  .stat-icon {
+    font-size: 2.5rem;
+  }
+
+  .stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: $color-text-secondary;
+  }
+}
+
+// Section Title
+.section-title {
+  max-width: 1600px;
+  margin: 3rem auto 1.5rem;
+  padding: 0 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+// Charts Section
+.charts-section {
+  max-width: 1600px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.chart-card {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  padding: 1.5rem;
+
+  &.large {
+    grid-column: span 1;
+
+    @media (min-width: 900px) {
+      grid-column: span 1;
+    }
+  }
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+}
+
+.chart-container {
+  height: 280px;
+  position: relative;
+}
+
+// Leaderboards Section
+.leaderboards-section {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.leaderboards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.leaderboard-card {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  padding: 1.5rem;
+
+  &.shame {
+    border-color: rgba($color-traitor, 0.3);
+    background: linear-gradient(180deg, rgba($color-traitor, 0.05) 0%, transparent 100%);
+  }
+
+  &.karma-good {
+    border-color: rgba($color-innocent, 0.3);
+    background: linear-gradient(180deg, rgba($color-innocent, 0.05) 0%, transparent 100%);
+  }
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid $color-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $color-bg-hover;
+  font-weight: 600;
+  font-size: 0.875rem;
+
+  &.gold {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1a24;
+  }
+
+  &.silver {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: #1a1a24;
+  }
+
+  &.bronze {
+    background: linear-gradient(135deg, #cd7f32, #a0522d);
+    color: #1a1a24;
+  }
+
+  &.shame {
+    background: rgba($color-traitor, 0.2);
+    color: $color-traitor;
+  }
+}
+
+.player-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.player-stat {
+  font-weight: 700;
+  color: $color-accent;
+
+  &.negative {
+    color: $color-traitor;
+  }
+}
+
+// ========== PLAYER PAIRS SECTION ==========
+.pairs-section {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.pairs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.pair-card {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  padding: 1.5rem;
+
+  &.good {
+    border-color: rgba($color-innocent, 0.3);
+    background: linear-gradient(180deg, rgba($color-innocent, 0.05) 0%, transparent 100%);
+  }
+
+  &.bad {
+    border-color: rgba($color-traitor, 0.3);
+    background: linear-gradient(180deg, rgba($color-traitor, 0.05) 0%, transparent 100%);
+  }
+
+  &.nemesis {
+    border-color: rgba(#f472b6, 0.3);
+    background: linear-gradient(180deg, rgba(#f472b6, 0.05) 0%, transparent 100%);
+  }
+
+  &.rivalry {
+    border-color: rgba($color-jester, 0.3);
+    background: linear-gradient(180deg, rgba($color-jester, 0.05) 0%, transparent 100%);
+  }
+
+  &.frequent {
+    border-color: rgba($color-accent, 0.3);
+    background: linear-gradient(180deg, rgba($color-accent, 0.05) 0%, transparent 100%);
+  }
+
+  h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .pair-description {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    color: $color-text-secondary;
+  }
+}
+
+.pair-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 600px;
+  overflow-y: auto;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-bg;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-border;
+    border-radius: 3px;
+
+    &:hover {
+      background: $color-text-secondary;
+    }
+  }
+}
+
+.expand-btn {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: $color-bg-hover;
+  border: 1px solid $color-border;
+  border-radius: 0.5rem;
+  color: $color-text-secondary;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $color-bg;
+    border-color: $color-accent;
+    color: $color-text;
+  }
+}
+
+.pair-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba($color-bg-hover, 0.5);
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.pair-rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $color-bg;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+
+  &.gold {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a1a24;
+  }
+
+  &.silver {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    color: #1a1a24;
+  }
+
+  &.bronze {
+    background: linear-gradient(135deg, #cd7f32, #a0522d);
+    color: #1a1a24;
+  }
+
+  &.shame {
+    background: rgba($color-traitor, 0.2);
+    color: $color-traitor;
+  }
+}
+
+.pair-players {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  .pair-name {
+    font-weight: 500;
+  }
+
+  .pair-separator {
+    color: $color-text-secondary;
+    font-size: 0.875rem;
+  }
+}
+
+.pair-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+
+  .pair-winrate {
+    font-weight: 700;
+    font-size: 1rem;
+
+    &.positive {
+      color: $color-innocent;
+    }
+
+    &.negative {
+      color: $color-traitor;
+    }
+  }
+
+  .pair-rounds {
+    font-size: 0.75rem;
+    color: $color-text-secondary;
+  }
+
+  .pair-rounds-large {
+    font-weight: 600;
+    color: $color-accent;
+  }
+}
+
+// Nemesis specific styles
+.nemesis-players {
+  .killer {
+    color: $color-traitor;
+  }
+
+  .kill-arrow {
+    color: $color-text-secondary;
+    font-size: 1.25rem;
+  }
+
+  .victim {
+    color: $color-text-secondary;
+  }
+}
+
+.kill-count {
+  font-weight: 700;
+  color: $color-traitor;
+}
+
+.headshot-count {
+  font-size: 0.75rem;
+  color: $color-jester;
+}
+
+// Rivalry specific styles
+.rivalry-item {
+  .rivalry-players {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .rivalry-player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .rivalry-kills {
+    font-weight: 700;
+    color: $color-traitor;
+    background: rgba($color-traitor, 0.15);
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .rivalry-vs {
+    font-weight: 600;
+    color: $color-jester;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+}
+
+.total-kills {
+  font-weight: 600;
+  color: $color-accent;
+}
+
+.pair-empty {
+  text-align: center;
+  color: $color-text-secondary;
+  font-style: italic;
+  padding: 1rem;
+}
+
+// Players Section
+.players-section {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.player-card {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $color-accent;
+  }
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $color-border;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .player-rounds {
+    font-size: 0.875rem;
+    color: $color-text-secondary;
+    background: $color-bg-hover;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+  }
+}
+
+.player-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.player-stat-item {
+  text-align: center;
+
+  .stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: $color-text-secondary;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    &.positive {
+      color: $color-innocent;
+    }
+
+    &.negative {
+      color: $color-traitor;
+    }
+  }
+}
+
+.player-extras {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 0;
+  border-top: 1px solid $color-border;
+  border-bottom: 1px solid $color-border;
+}
+
+.extra-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  .extra-label {
+    font-size: 0.75rem;
+    color: $color-text-secondary;
+  }
+
+  .extra-value {
+    font-weight: 600;
+
+    &.positive {
+      color: $color-innocent;
+    }
+
+    &.negative {
+      color: $color-traitor;
+    }
+  }
+}
+
+.player-roles {
+  margin-top: 1rem;
+
+  .roles-label {
+    display: block;
+    font-size: 0.75rem;
+    color: $color-text-secondary;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.roles-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.role-tag {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: $color-bg-hover;
+
+  &.role-innocent {
+    background: rgba($color-innocent, 0.15);
+    color: $color-innocent;
+  }
+
+  &.role-traitor {
+    background: rgba($color-traitor, 0.15);
+    color: $color-traitor;
+  }
+
+  &.role-jester {
+    background: rgba($color-jester, 0.15);
+    color: $color-jester;
+  }
+
+  &.role-independent {
+    background: rgba($color-independent, 0.15);
+    color: $color-independent;
+  }
+}
+
+// Weapons Section
+.weapons-section,
+.maps-section {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.weapons-table,
+.maps-table {
+  background: $color-bg-card;
+  border: 1px solid $color-border;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 1rem 1.5rem;
+  background: $color-bg-hover;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: $color-text-secondary;
+}
+
+.maps-table .table-header {
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid $color-border;
+  transition: background 0.2s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: $color-bg-hover;
+  }
+}
+
+.maps-table .table-row {
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+}
+
+.weapon-name,
+.map-name {
+  font-weight: 500;
+}
+
+.weapon-kills,
+.weapon-headshots,
+.weapon-hsrate,
+.map-rounds,
+.map-innocent,
+.map-traitor {
+  text-align: center;
+}
+
+.map-innocent {
+  color: $color-innocent;
+}
+
+.map-traitor {
+  color: $color-traitor;
+}
+
+.map-balance {
+  text-align: center;
+  font-weight: 500;
+
+  &.innocent-favored {
+    color: $color-innocent;
+  }
+
+  &.traitor-favored {
+    color: $color-traitor;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card.large {
+    grid-column: span 1;
+  }
+
+  .player-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table-header,
+  .table-row {
+    font-size: 0.8rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .players-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.positive {
+  color: $color-innocent;
+}
+
+.negative {
+  color: $color-traitor;
+}
