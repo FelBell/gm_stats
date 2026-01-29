@@ -98,6 +98,23 @@ hook.Add("TTTBeginRound", "TTTStats_BeginRound", function()
     ResetRound()
 end)
 
+-- Helper to get a readable name for damage types
+local function GetDamageName(dmg_type)
+    -- Using bitwise AND to check for damage flags, as they can be combined.
+    -- Order matters: check for more specific/impactful types first.
+    if bit.band(dmg_type, DMG_BLAST) ~= 0 then return "Explosion" end
+    if bit.band(dmg_type, DMG_FALL) ~= 0 then return "Fall Damage" end
+    if bit.band(dmg_type, DMG_CRUSH) ~= 0 then return "Crushed" end
+    if bit.band(dmg_type, DMG_BURN) ~= 0 or bit.band(dmg_type, DMG_SLOWBURN) ~= 0 then return "Burned" end
+    if bit.band(dmg_type, DMG_DROWN) ~= 0 then return "Drowned" end
+    if bit.band(dmg_type, DMG_POISON) ~= 0 or bit.band(dmg_type, DMG_NERVEGAS) ~= 0 then return "Poisoned" end
+    if bit.band(dmg_type, DMG_SHOCK) ~= 0 then return "Shock" end
+    if bit.band(dmg_type, DMG_ENERGYBEAM) ~= 0 then return "Energy Beam" end
+    if bit.band(dmg_type, DMG_DISSOLVE) ~= 0 then return "Dissolved" end
+    return nil
+end
+
+
 -- 2. Player Death
 hook.Add("PlayerDeath", "TTTStats_PlayerDeath", function(victim, inflictor, attacker)
     -- Only track if we are in a tracked round
@@ -128,11 +145,25 @@ hook.Add("PlayerDeath", "TTTStats_PlayerDeath", function(victim, inflictor, atta
         kill_info.attacker_steamid = nil
         kill_info.attacker_role = nil
 
-        if IsValid(inflictor) then
-            kill_info.weapon = inflictor:GetClass()
-        else
-            kill_info.weapon = "world"
+        local cause_of_death = nil
+        -- Safely call LastTakenDamageInfo as it might not always exist or be reliable
+        local success, dmg_info = pcall(victim.LastTakenDamageInfo, victim)
+
+        if success and IsValid(dmg_info) then
+            local dmg_type = dmg_info:GetDamageType()
+            cause_of_death = GetDamageName(dmg_type)
         end
+
+        -- Fallback to original logic if we couldn't determine a specific cause
+        if not cause_of_death then
+            if IsValid(inflictor) then
+                cause_of_death = inflictor:GetClass()
+            else
+                cause_of_death = "world"
+            end
+        end
+
+        kill_info.weapon = cause_of_death
     end
 
     -- Initialize kills table if missing (safety)
