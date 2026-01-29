@@ -26,13 +26,15 @@ local vanilla_item_map = {
 
 -- Helper to get item name
 local function GetItemName(equipment, is_item)
+    local name
     if is_item then
         -- It's a numerical ID for a vanilla item
-        return vanilla_item_map[equipment] or "item_" .. tostring(equipment)
+        name = vanilla_item_map[equipment] or "item_" .. tostring(equipment)
     else
         -- It's a weapon class string
-        return tostring(equipment)
+        name = tostring(equipment)
     end
+    return name:gsub("^item_", "")
 end
 
 -- Helper to generate UUID v4
