@@ -1,0 +1,8 @@
+{
+    "/api": {
+        "target": "https://ttt.fbell.de",
+        "secure": true,
+        "changeOrigin": true,
+        "logLevel": "debug"
+    }
+}
