@@ -147,27 +147,6 @@
           </div>
         </div>
 
-        <!-- Most Total Kills (absolute) -->
-        <div class="leaderboard-card">
-          <h3>🏆 Meiste Kills (gesamt)</h3>
-          <div class="leaderboard-list">
-            @for (player of mostTotalKills(); track player.steamId; let i = $index) {
-              <div class="leaderboard-item">
-                <span
-                  class="rank"
-                  [class.gold]="i === 0"
-                  [class.silver]="i === 1"
-                  [class.bronze]="i === 2"
-                >
-                  {{ i + 1 }}
-                </span>
-                <span class="player-name">{{ player.displayName }}</span>
-                <span class="player-stat">{{ player.kills }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
         <!-- Best K/D -->
         <div class="leaderboard-card">
           <h3>⚔️ Beste K/D</h3>
@@ -210,20 +189,6 @@
           </div>
         </div>
 
-        <!-- Most Deaths (Hall of Shame) -->
-        <div class="leaderboard-card shame">
-          <h3>☠️ Hall of Shame (Meiste Tode)</h3>
-          <div class="leaderboard-list">
-            @for (player of mostDeaths(); track player.steamId; let i = $index) {
-              <div class="leaderboard-item">
-                <span class="rank shame">{{ i + 1 }}</span>
-                <span class="player-name">{{ player.displayName }}</span>
-                <span class="player-stat negative">{{ player.deaths }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
         <!-- Most Teamkills -->
         @if (mostTeamkills().length > 0) {
           <div class="leaderboard-card shame">
@@ -234,43 +199,6 @@
                   <span class="rank shame">{{ i + 1 }}</span>
                   <span class="player-name">{{ player.displayName }}</span>
                   <span class="player-stat negative">{{ player.teamkills }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- Best Karma -->
-        <div class="leaderboard-card karma-good">
-          <h3>😇 Karma-Engel</h3>
-          <div class="leaderboard-list">
-            @for (player of bestKarma(); track player.steamId; let i = $index) {
-              <div class="leaderboard-item">
-                <span
-                  class="rank"
-                  [class.gold]="i === 0"
-                  [class.silver]="i === 1"
-                  [class.bronze]="i === 2"
-                >
-                  {{ i + 1 }}
-                </span>
-                <span class="player-name">{{ player.displayName }}</span>
-                <span class="player-stat positive">+{{ player.karmaTotal }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Worst Karma -->
-        @if (worstKarma().length > 0) {
-          <div class="leaderboard-card shame">
-            <h3>😈 Karma-Sünder</h3>
-            <div class="leaderboard-list">
-              @for (player of worstKarma(); track player.steamId; let i = $index) {
-                <div class="leaderboard-item">
-                  <span class="rank shame">{{ i + 1 }}</span>
-                  <span class="player-name">{{ player.displayName }}</span>
-                  <span class="player-stat negative">{{ player.karmaTotal }}</span>
                 </div>
               }
             </div>
@@ -296,6 +224,26 @@
                   class="player-stat"
                   [class.positive]="player.avgKarma > 0"
                   [class.negative]="player.avgKarma < 0"
+                >
+                  {{ player.avgKarma > 0 ? '+' : '' }}{{ player.avgKarma }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Worst Avg Karma per Round -->
+        <div class="leaderboard-card shame">
+          <h3>💀 Schlechtestes Karma/Runde</h3>
+          <div class="leaderboard-list">
+            @for (player of worstAvgKarmaPerRound(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank shame">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span
+                  class="player-stat"
+                  [class.positive]="player.avgKarma > 0"
+                  [class.negative]="player.avgKarma <= 0"
                 >
                   {{ player.avgKarma > 0 ? '+' : '' }}{{ player.avgKarma }}
                 </span>

@@ -1,5 +1,31 @@
 /* Global styles for TTT Stats */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  /* TTT Color Palette */
+  --ttt-bg-dark: #121214;
+  --ttt-bg-card: #1e1e24;
+  --ttt-bg-hover: #272730;
+
+  --ttt-text-primary: #ffffff;
+  --ttt-text-secondary: #a1a1aa;
+  --ttt-text-muted: #71717a;
+
+  --ttt-color-traitor: #ef4444; /* Red-500 */
+  --ttt-color-detective: #3b82f6; /* Blue-500 */
+  --ttt-color-innocent: #22c55e; /* Green-500 */
+  --ttt-color-jester: #eab308; /* Yellow-500 */
+  --ttt-color-accent: var(--ttt-color-detective);
+
+  --ttt-border-color: #3f3f46;
+  --ttt-border-radius: 4px; /* Keeping it slightly squared for tactical feel */
+
+  --ttt-font-heading: 'Rajdhani', sans-serif;
+  --ttt-font-body: 'Inter', sans-serif;
+
+  --ttt-shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+  --ttt-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
 
 *,
 *::before,
@@ -15,21 +41,91 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    sans-serif;
-  background: #0f0f13;
-  color: #e4e4eb;
+  font-family: var(--ttt-font-body);
+  background-color: var(--ttt-bg-dark);
+  background-image:
+    linear-gradient(rgba(18, 18, 20, 0.95), rgba(18, 18, 20, 0.95)),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  color: var(--ttt-text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--ttt-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--ttt-font-heading);
+}
+
+// Global Button Styles
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--ttt-border-radius);
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &-stats {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--ttt-color-detective);
+    border-color: rgba(59, 130, 246, 0.2);
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  &-refresh {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--ttt-text-secondary);
+    border-color: var(--ttt-border-color);
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--ttt-text-primary);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &-primary {
+    background: var(--ttt-color-accent);
+    color: white;
+
+    &:hover {
+      background: #2563eb; // darker blue
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+  }
 }
 
 // Custom scrollbar
@@ -39,26 +135,26 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a24;
+  background: var(--ttt-bg-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a3a4a;
+  background: #3f3f46;
   border-radius: 4px;
 
   &:hover {
-    background: #4a4a5a;
+    background: #52525b;
   }
 }
 
 // Selection
 ::selection {
-  background: rgba(99, 102, 241, 0.4);
+  background: rgba(59, 130, 246, 0.4);
   color: #fff;
 }
 
 // Focus styles
 :focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--ttt-color-detective);
   outline-offset: 2px;
 }
