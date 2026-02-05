@@ -144,7 +144,12 @@ def get_stats():
     offset = request.args.get('offset', 0, type=int)
 
     rounds = Round.query.order_by(Round.timestamp.desc()).offset(offset).limit(limit).all()
-    return jsonify([r.to_dict() for r in rounds])
+
+    # Fetch all players to create a mapping for nicknames
+    players = Player.query.all()
+    player_map = {p.steam_id: p.display_name for p in players}
+
+    return jsonify([r.to_dict(player_map) for r in rounds])
 
 @app.route('/api/player/update', methods=['POST'])
 @require_api_key
