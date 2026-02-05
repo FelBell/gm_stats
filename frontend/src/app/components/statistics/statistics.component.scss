@@ -1,33 +1,37 @@
-// Variables
-$color-bg: #0f0f13;
-$color-bg-card: #1a1a24;
-$color-bg-hover: #252532;
-$color-border: #2a2a3a;
-$color-text: #e4e4eb;
-$color-text-secondary: #9090a0;
-$color-accent: #6366f1;
-$color-innocent: #4ade80;
-$color-traitor: #f87171;
-$color-jester: #fbbf24;
-$color-independent: #a78bfa;
-$color-timelimit: #94a3b8;
+@use 'sass:color';
+
+// Statistics Component Styles
 
 .statistics {
   min-height: 100vh;
-  background: $color-bg;
-  color: $color-text;
   padding-bottom: 4rem;
 }
 
-// Header
+// Header reuse (scoped but similar to dashboard for consistency)
 .header {
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, transparent 100%);
-  border-bottom: 1px solid $color-border;
+  background: rgba(18, 18, 20, 0.8);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
   padding: 1.5rem 2rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      var(--ttt-color-detective) 50%, 
+      transparent 100%
+    );
+    opacity: 0.5;
+  }
 }
 
 .header-content {
@@ -43,111 +47,37 @@ $color-timelimit: #94a3b8;
 .header-left {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .back-link {
-  color: $color-text-secondary;
-  text-decoration: none;
+  color: var(--ttt-text-secondary);
   font-size: 0.875rem;
-  transition: color 0.2s;
-
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
   &:hover {
-    color: $color-accent;
+    color: var(--ttt-color-detective);
+    transform: translateX(-4px);
+    display: inline-block;
   }
 }
 
 .logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ttt-text-primary);
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, $color-accent, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-
+  
   .logo-icon {
-    font-size: 2rem;
-    -webkit-text-fill-color: initial;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
   }
 }
 
-// Buttons
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.btn-refresh {
-  background: $color-bg-card;
-  color: $color-text;
-  border: 1px solid $color-border;
-
-  &:hover:not(:disabled) {
-    background: $color-bg-hover;
-    border-color: $color-accent;
-  }
-}
-
-.btn-primary {
-  background: $color-accent;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: color-mix(in srgb, $color-accent 80%, white);
-  }
-}
-
-// Loading & Error States
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-  color: $color-text-secondary;
-}
-
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 3px solid $color-border;
-  border-top-color: $color-accent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.error-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-// Global Stats Overview
+// Global Stats Cards
 .global-stats {
   max-width: 1600px;
   margin: 2rem auto;
@@ -158,24 +88,42 @@ $color-timelimit: #94a3b8;
 }
 
 .stat-card {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition:
-    transform 0.2s,
-    border-color 0.2s;
-
-  &:hover {
-    transform: translateY(-2px);
-    border-color: $color-accent;
+  position: relative;
+  overflow: hidden;
+  
+  // Tactical top border
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--ttt-border-color);
+    transition: all 0.3s;
+  }
+  
+  &:hover::before {
+      background: var(--ttt-color-detective);
+      box-shadow: 0 0 10px var(--ttt-color-detective);
   }
 
   .stat-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
   }
 
   .stat-content {
@@ -186,21 +134,31 @@ $color-timelimit: #94a3b8;
   .stat-value {
     font-size: 1.75rem;
     font-weight: 700;
+    color: var(--ttt-text-primary);
+    font-family: var(--ttt-font-heading);
+    line-height: 1.1;
   }
 
   .stat-label {
     font-size: 0.875rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
+    text-transform: uppercase;
   }
 }
 
-// Section Title
-.section-title {
-  max-width: 1600px;
-  margin: 3rem auto 1.5rem;
-  padding: 0 2rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+.winner-breakdown {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    
+    span {
+        font-weight: 600;
+        
+        &.winner-innocent { color: var(--ttt-color-innocent); }
+        &.winner-traitor { color: var(--ttt-color-traitor); }
+        &.winner-other { color: var(--ttt-text-secondary); }
+    }
 }
 
 // Charts Section
@@ -212,135 +170,162 @@ $color-timelimit: #94a3b8;
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); // Minimal bigger charts
   gap: 1.5rem;
 }
 
 .chart-card {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
   padding: 1.5rem;
-
+  display: flex;
+  flex-direction: column;
+  
   &.large {
-    grid-column: span 1;
-
-    @media (min-width: 900px) {
-      grid-column: span 1;
-    }
+      grid-column: 1 / -1;
   }
-
+  
   h3 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+      color: var(--ttt-text-primary);
+      border-left: 3px solid var(--ttt-color-accent);
+      padding-left: 0.75rem;
   }
 }
 
 .chart-container {
-  height: 280px;
-  position: relative;
+    position: relative;
+    height: 300px;
+    width: 100%;
 }
 
 // Leaderboards Section
 .leaderboards-section {
   max-width: 1600px;
-  margin: 0 auto;
+  margin: 3rem auto;
   padding: 0 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--ttt-text-primary);
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 .leaderboards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .leaderboard-card {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
-  padding: 1.5rem;
-
-  &.shame {
-    border-color: rgba($color-traitor, 0.3);
-    background: linear-gradient(180deg, rgba($color-traitor, 0.05) 0%, transparent 100%);
-  }
-
-  &.karma-good {
-    border-color: rgba($color-innocent, 0.3);
-    background: linear-gradient(180deg, rgba($color-innocent, 0.05) 0%, transparent 100%);
-  }
-
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
+  overflow: hidden;
+  
   h3 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
+      background: rgba(0,0,0,0.3);
+      padding: 1rem 1.25rem;
+      font-size: 1.1rem;
+      border-bottom: 1px solid var(--ttt-border-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+  }
+  
+  &.shame {
+      border-color: rgba(239, 68, 68, 0.3);
+      h3 { background: rgba(239, 68, 68, 0.1); color: var(--ttt-color-traitor); }
+  }
+  
+  &.karma-good {
+      border-color: rgba(34, 197, 94, 0.3);
+      h3 { background: rgba(34, 197, 94, 0.1); color: var(--ttt-color-innocent); }
   }
 }
 
 .leaderboard-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .leaderboard-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid $color-border;
-
-  &:last-child {
-    border-bottom: none;
-  }
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.2s;
+    
+    &:last-child {
+        border-bottom: none;
+    }
+    
+    &:hover {
+        background: rgba(255,255,255,0.02);
+    }
 }
 
 .rank {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: $color-bg-hover;
-  font-weight: 600;
-  font-size: 0.875rem;
-
-  &.gold {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: #1a1a24;
-  }
-
-  &.silver {
-    background: linear-gradient(135deg, #94a3b8, #64748b);
-    color: #1a1a24;
-  }
-
-  &.bronze {
-    background: linear-gradient(135deg, #cd7f32, #a0522d);
-    color: #1a1a24;
-  }
-
-  &.shame {
-    background: rgba($color-traitor, 0.2);
-    color: $color-traitor;
-  }
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    color: var(--ttt-text-secondary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-right: 1rem;
+    
+    &.gold { background: linear-gradient(135deg, #ffd700, #b8860b); color: #000; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    &.silver { background: linear-gradient(135deg, #e0e0e0, #a9a9a9); color: #000; }
+    &.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+    
+    &.shame { background: rgba(239, 68, 68, 0.2); color: var(--ttt-color-traitor); }
 }
 
 .player-name {
-  flex: 1;
-  font-weight: 500;
+    flex: 1;
+    font-weight: 500;
+    color: var(--ttt-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .player-stat {
-  font-weight: 700;
-  color: $color-accent;
-
-  &.negative {
-    color: $color-traitor;
-  }
+    font-weight: 700;
+    font-family: monospace;
+    color: var(--ttt-color-detective);
+    
+    &.positive { color: var(--ttt-color-innocent); }
+    &.negative { color: var(--ttt-color-traitor); }
 }
+
+// Loading & Error States
+.loading-container, .error-container {
+    padding: 4rem;
+    text-align: center;
+    color: var(--ttt-text-secondary);
+}
+
+.spinner {
+    margin: 0 auto 1.5rem;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--ttt-color-detective);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 // ========== PLAYER PAIRS SECTION ==========
 .pairs-section {
@@ -356,34 +341,34 @@ $color-timelimit: #94a3b8;
 }
 
 .pair-card {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
   padding: 1.5rem;
 
   &.good {
-    border-color: rgba($color-innocent, 0.3);
-    background: linear-gradient(180deg, rgba($color-innocent, 0.05) 0%, transparent 100%);
+    border-color: rgba(34, 197, 94, 0.3); // innocent green
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0%, transparent 100%);
   }
 
   &.bad {
-    border-color: rgba($color-traitor, 0.3);
-    background: linear-gradient(180deg, rgba($color-traitor, 0.05) 0%, transparent 100%);
+    border-color: rgba(239, 68, 68, 0.3); // traitor red
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, transparent 100%);
   }
 
   &.nemesis {
-    border-color: rgba(#f472b6, 0.3);
-    background: linear-gradient(180deg, rgba(#f472b6, 0.05) 0%, transparent 100%);
+    border-color: rgba(244, 114, 182, 0.3); // pinkish
+    background: linear-gradient(180deg, rgba(244, 114, 182, 0.05) 0%, transparent 100%);
   }
 
   &.rivalry {
-    border-color: rgba($color-jester, 0.3);
-    background: linear-gradient(180deg, rgba($color-jester, 0.05) 0%, transparent 100%);
+    border-color: rgba(234, 179, 8, 0.3); // jester yellow
+    background: linear-gradient(180deg, rgba(234, 179, 8, 0.05) 0%, transparent 100%);
   }
 
   &.frequent {
-    border-color: rgba($color-accent, 0.3);
-    background: linear-gradient(180deg, rgba($color-accent, 0.05) 0%, transparent 100%);
+    border-color: rgba(59, 130, 246, 0.3); // accent blue
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
   }
 
   h3 {
@@ -395,7 +380,7 @@ $color-timelimit: #94a3b8;
   .pair-description {
     margin: 0 0 1rem;
     font-size: 0.8rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
   }
 }
 
@@ -403,8 +388,9 @@ $color-timelimit: #94a3b8;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-height: 600px;
+  max-height: 500px;
   overflow-y: auto;
+  padding-right: 0.5rem; // space for scrollbar
 
   // Custom scrollbar
   &::-webkit-scrollbar {
@@ -412,16 +398,16 @@ $color-timelimit: #94a3b8;
   }
 
   &::-webkit-scrollbar-track {
-    background: $color-bg;
+    background: var(--ttt-bg-dark);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: $color-border;
+    background: var(--ttt-border-color);
     border-radius: 3px;
 
     &:hover {
-      background: $color-text-secondary;
+      background: var(--ttt-text-secondary);
     }
   }
 }
@@ -430,18 +416,18 @@ $color-timelimit: #94a3b8;
   width: 100%;
   margin-top: 1rem;
   padding: 0.75rem;
-  background: $color-bg-hover;
-  border: 1px solid $color-border;
-  border-radius: 0.5rem;
-  color: $color-text-secondary;
+  background: var(--ttt-bg-hover);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
+  color: var(--ttt-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: $color-bg;
-    border-color: $color-accent;
-    color: $color-text;
+    background: var(--ttt-bg-card);
+    border-color: var(--ttt-color-accent);
+    color: var(--ttt-text-primary);
   }
 }
 
@@ -450,12 +436,12 @@ $color-timelimit: #94a3b8;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: rgba($color-bg-hover, 0.5);
-  border-radius: 0.5rem;
+  background: rgba(39, 39, 48, 0.5); // bg-hover
+  border-radius: var(--ttt-border-radius);
   transition: background 0.2s;
 
   &:hover {
-    background: $color-bg-hover;
+    background: var(--ttt-bg-hover);
   }
 }
 
@@ -466,7 +452,7 @@ $color-timelimit: #94a3b8;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: $color-bg;
+  background: var(--ttt-bg-dark);
   font-weight: 600;
   font-size: 0.875rem;
   flex-shrink: 0;
@@ -487,8 +473,8 @@ $color-timelimit: #94a3b8;
   }
 
   &.shame {
-    background: rgba($color-traitor, 0.2);
-    color: $color-traitor;
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--ttt-color-traitor);
   }
 }
 
@@ -504,7 +490,7 @@ $color-timelimit: #94a3b8;
   }
 
   .pair-separator {
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
     font-size: 0.875rem;
   }
 }
@@ -520,49 +506,49 @@ $color-timelimit: #94a3b8;
     font-size: 1rem;
 
     &.positive {
-      color: $color-innocent;
+      color: var(--ttt-color-innocent);
     }
 
     &.negative {
-      color: $color-traitor;
+      color: var(--ttt-color-traitor);
     }
   }
 
   .pair-rounds {
     font-size: 0.75rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
   }
 
   .pair-rounds-large {
     font-weight: 600;
-    color: $color-accent;
+    color: var(--ttt-color-accent);
   }
 }
 
 // Nemesis specific styles
 .nemesis-players {
   .killer {
-    color: $color-traitor;
+    color: var(--ttt-color-traitor);
   }
 
   .kill-arrow {
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
     font-size: 1.25rem;
   }
 
   .victim {
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
   }
 }
 
 .kill-count {
   font-weight: 700;
-  color: $color-traitor;
+  color: var(--ttt-color-traitor);
 }
 
 .headshot-count {
   font-size: 0.75rem;
-  color: $color-jester;
+  color: var(--ttt-color-jester);
 }
 
 // Rivalry specific styles
@@ -582,8 +568,8 @@ $color-timelimit: #94a3b8;
 
   .rivalry-kills {
     font-weight: 700;
-    color: $color-traitor;
-    background: rgba($color-traitor, 0.15);
+    color: var(--ttt-color-traitor);
+    background: rgba(239, 68, 68, 0.15);
     padding: 0.125rem 0.5rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
@@ -591,7 +577,7 @@ $color-timelimit: #94a3b8;
 
   .rivalry-vs {
     font-weight: 600;
-    color: $color-jester;
+    color: var(--ttt-color-jester);
     font-size: 0.75rem;
     text-transform: uppercase;
   }
@@ -599,17 +585,17 @@ $color-timelimit: #94a3b8;
 
 .total-kills {
   font-weight: 600;
-  color: $color-accent;
+  color: var(--ttt-color-accent);
 }
 
 .pair-empty {
   text-align: center;
-  color: $color-text-secondary;
+  color: var(--ttt-text-secondary);
   font-style: italic;
   padding: 1rem;
 }
 
-// Players Section
+// Players Cards Section
 .players-section {
   max-width: 1600px;
   margin: 0 auto;
@@ -623,17 +609,16 @@ $color-timelimit: #94a3b8;
 }
 
 .player-card {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
   padding: 1.5rem;
-  transition:
-    transform 0.2s,
-    border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s;
 
   &:hover {
     transform: translateY(-2px);
-    border-color: $color-accent;
+    border-color: var(--ttt-color-accent);
+    box-shadow: var(--ttt-shadow-card);
   }
 }
 
@@ -643,7 +628,7 @@ $color-timelimit: #94a3b8;
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid var(--ttt-border-color);
 
   h3 {
     margin: 0;
@@ -653,8 +638,8 @@ $color-timelimit: #94a3b8;
 
   .player-rounds {
     font-size: 0.875rem;
-    color: $color-text-secondary;
-    background: $color-bg-hover;
+    color: var(--ttt-text-secondary);
+    background: var(--ttt-bg-hover);
     padding: 0.25rem 0.75rem;
     border-radius: 1rem;
   }
@@ -673,7 +658,7 @@ $color-timelimit: #94a3b8;
   .stat-label {
     display: block;
     font-size: 0.75rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
     margin-bottom: 0.25rem;
   }
 
@@ -681,14 +666,10 @@ $color-timelimit: #94a3b8;
     display: block;
     font-size: 1.1rem;
     font-weight: 700;
+    font-family: var(--ttt-font-heading);
 
-    &.positive {
-      color: $color-innocent;
-    }
-
-    &.negative {
-      color: $color-traitor;
-    }
+    &.positive { color: var(--ttt-color-innocent); }
+    &.negative { color: var(--ttt-color-traitor); }
   }
 }
 
@@ -697,8 +678,8 @@ $color-timelimit: #94a3b8;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   padding: 1rem 0;
-  border-top: 1px solid $color-border;
-  border-bottom: 1px solid $color-border;
+  border-top: 1px solid var(--ttt-border-color);
+  border-bottom: 1px solid var(--ttt-border-color);
 }
 
 .extra-item {
@@ -708,19 +689,14 @@ $color-timelimit: #94a3b8;
 
   .extra-label {
     font-size: 0.75rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
   }
 
   .extra-value {
     font-weight: 600;
 
-    &.positive {
-      color: $color-innocent;
-    }
-
-    &.negative {
-      color: $color-traitor;
-    }
+    &.positive { color: var(--ttt-color-innocent); }
+    &.negative { color: var(--ttt-color-traitor); }
   }
 }
 
@@ -730,7 +706,7 @@ $color-timelimit: #94a3b8;
   .roles-label {
     display: block;
     font-size: 0.75rem;
-    color: $color-text-secondary;
+    color: var(--ttt-text-secondary);
     margin-bottom: 0.5rem;
   }
 }
@@ -746,26 +722,31 @@ $color-timelimit: #94a3b8;
   border-radius: 0.25rem;
   font-size: 0.75rem;
   font-weight: 500;
-  background: $color-bg-hover;
+  background: var(--ttt-bg-hover);
+  border: 1px solid transparent;
 
   &.role-innocent {
-    background: rgba($color-innocent, 0.15);
-    color: $color-innocent;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--ttt-color-innocent);
+    border-color: rgba(34, 197, 94, 0.3);
   }
 
   &.role-traitor {
-    background: rgba($color-traitor, 0.15);
-    color: $color-traitor;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--ttt-color-traitor);
+    border-color: rgba(239, 68, 68, 0.3);
   }
 
   &.role-jester {
-    background: rgba($color-jester, 0.15);
-    color: $color-jester;
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--ttt-color-jester);
+    border-color: rgba(234, 179, 8, 0.3);
   }
 
   &.role-independent {
-    background: rgba($color-independent, 0.15);
-    color: $color-independent;
+    background: rgba(167, 139, 250, 0.15);
+    color: #a78bfa;
+    border-color: rgba(167, 139, 250, 0.3);
   }
 }
 
@@ -779,9 +760,9 @@ $color-timelimit: #94a3b8;
 
 .weapons-table,
 .maps-table {
-  background: $color-bg-card;
-  border: 1px solid $color-border;
-  border-radius: 1rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
   overflow: hidden;
 }
 
@@ -789,10 +770,13 @@ $color-timelimit: #94a3b8;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   padding: 1rem 1.5rem;
-  background: $color-bg-hover;
+  background: rgba(255, 255, 255, 0.05);
   font-weight: 600;
   font-size: 0.875rem;
-  color: $color-text-secondary;
+  color: var(--ttt-text-secondary);
+  font-family: var(--ttt-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .maps-table .table-header {
@@ -803,15 +787,16 @@ $color-timelimit: #94a3b8;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid var(--ttt-border-color);
   transition: background 0.2s;
+  color: var(--ttt-text-primary);
 
   &:last-child {
     border-bottom: none;
   }
 
   &:hover {
-    background: $color-bg-hover;
+    background: var(--ttt-bg-hover);
   }
 }
 
@@ -821,7 +806,8 @@ $color-timelimit: #94a3b8;
 
 .weapon-name,
 .map-name {
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--ttt-text-primary);
 }
 
 .weapon-kills,
@@ -834,55 +820,40 @@ $color-timelimit: #94a3b8;
 }
 
 .map-innocent {
-  color: $color-innocent;
+  color: var(--ttt-color-innocent);
 }
 
 .map-traitor {
-  color: $color-traitor;
+  color: var(--ttt-color-traitor);
 }
 
 .map-balance {
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: monospace;
 
   &.innocent-favored {
-    color: $color-innocent;
+    color: var(--ttt-color-innocent);
   }
 
   &.traitor-favored {
-    color: $color-traitor;
+    color: var(--ttt-color-traitor);
   }
 }
 
 // Responsive
 @media (max-width: 768px) {
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-card.large {
-    grid-column: span 1;
-  }
-
-  .player-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .table-header,
-  .table-row {
-    font-size: 0.8rem;
-    padding: 0.75rem 1rem;
-  }
-
-  .players-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.positive {
-  color: $color-innocent;
-}
-
-.negative {
-  color: $color-traitor;
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+        
+        .stat-icon {
+            width: 40px; height: 40px; font-size: 1.5rem;
+        }
+        
+        .stat-value { font-size: 1.5rem; }
+    }
 }

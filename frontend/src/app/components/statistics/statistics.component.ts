@@ -13,7 +13,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { httpResource } from '@angular/common/http';
-import { Round, Kill, RoundPlayer } from '../../models/stats.model';
+import { Round } from '../../models/stats.model';
 import { environment } from '../../../environments/environment';
 import { Chart, registerables } from 'chart.js';
 
@@ -104,6 +104,12 @@ export class StatisticsComponent {
     'STEAM_0:1:949098480': 'Der Papa',
     'STEAM_0:1:512869438': 'Toodels',
     'STEAM_0:1:39907607': 'Lumien',
+    'STEAM_0:0:158949535': 'Sauron',
+    'STEAM_0:1:87186570': 'sim.lie',
+    'STEAM_0:0:140709318': '☭☭☭ Uppercut Ursula',
+    'STEAM_0:1:94263852': 'ben.liedel',
+    'STEAM_0:0:624153889': 'Mink',
+    'STEAM_0:0:638665069': 'soeren.hem',
   };
 
   // Chart refs
@@ -370,11 +376,6 @@ export class StatisticsComponent {
       .slice(0, 5),
   );
 
-  // Most total kills (absolute)
-  mostTotalKills = computed(() =>
-    [...this.playerStats()].sort((a, b) => b.kills - a.kills).slice(0, 5),
-  );
-
   // Best K/D
   bestKD = computed(() =>
     [...this.playerStats()]
@@ -391,11 +392,6 @@ export class StatisticsComponent {
       .slice(0, 5),
   );
 
-  // Most deaths
-  mostDeaths = computed(() =>
-    [...this.playerStats()].sort((a, b) => b.deaths - a.deaths).slice(0, 5),
-  );
-
   // Most teamkills
   mostTeamkills = computed(() =>
     [...this.playerStats()]
@@ -404,23 +400,7 @@ export class StatisticsComponent {
       .slice(0, 5),
   );
 
-  // Best karma (positive)
-  bestKarma = computed(() =>
-    [...this.playerStats()]
-      .filter((p) => p.roundsPlayed >= 3)
-      .sort((a, b) => b.karmaTotal - a.karmaTotal)
-      .slice(0, 5),
-  );
-
-  // Worst karma (negative / karma sinners)
-  worstKarma = computed(() =>
-    [...this.playerStats()]
-      .filter((p) => p.karmaTotal < 0)
-      .sort((a, b) => a.karmaTotal - b.karmaTotal)
-      .slice(0, 5),
-  );
-
-  // Average karma per round
+  // Average karma per round (best)
   avgKarmaPerRound = computed(() =>
     [...this.playerStats()]
       .filter((p) => p.roundsPlayed >= 5)
@@ -429,6 +409,18 @@ export class StatisticsComponent {
         avgKarma: Math.round((p.karmaTotal / p.roundsPlayed) * 100) / 100,
       }))
       .sort((a, b) => b.avgKarma - a.avgKarma)
+      .slice(0, 5),
+  );
+
+  // Average karma per round (worst)
+  worstAvgKarmaPerRound = computed(() =>
+    [...this.playerStats()]
+      .filter((p) => p.roundsPlayed >= 5)
+      .map((p) => ({
+        ...p,
+        avgKarma: Math.round((p.karmaTotal / p.roundsPlayed) * 100) / 100,
+      }))
+      .sort((a, b) => a.avgKarma - b.avgKarma)
       .slice(0, 5),
   );
 

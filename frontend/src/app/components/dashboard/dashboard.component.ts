@@ -24,6 +24,12 @@ export class DashboardComponent {
     'STEAM_0:1:949098480': 'Der Papa',
     'STEAM_0:1:512869438': 'Toodels',
     'STEAM_0:1:39907607': 'Lumien',
+    'STEAM_0:0:158949535': 'Sauron',
+    'STEAM_0:1:87186570': 'sim.lie',
+    'STEAM_0:0:140709318': '☭☭☭ Uppercut Ursula',
+    'STEAM_0:1:94263852': 'ben.liedel',
+    'STEAM_0:0:624153889': 'Mink',
+    'STEAM_0:0:638665069': 'soeren.hem',
   };
 
   // Pagination signals
