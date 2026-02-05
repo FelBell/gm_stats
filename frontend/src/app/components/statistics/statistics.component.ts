@@ -95,23 +95,6 @@ export class StatisticsComponent {
   private readonly apiUrl = environment.apiUrl;
   private readonly injector = inject(Injector);
 
-  // Hardcoded Steam ID to Display Name mapping
-  private readonly steamIdDisplayNames: Record<string, string> = {
-    'STEAM_0:0:130645458': 'Señor del Mapa',
-    'STEAM_0:1:619571923': 'cHoli',
-    'STEAM_0:0:504917834': 'gebrochen',
-    'STEAM_0:1:171849502': 'matze161',
-    'STEAM_0:1:949098480': 'Der Papa',
-    'STEAM_0:1:512869438': 'Toodels',
-    'STEAM_0:1:39907607': 'Lumien',
-    'STEAM_0:0:158949535': 'Sauron',
-    'STEAM_0:1:87186570': 'sim.lie',
-    'STEAM_0:0:140709318': '☭☭☭ Uppercut Ursula',
-    'STEAM_0:1:94263852': 'ben.liedel',
-    'STEAM_0:0:624153889': 'Mink',
-    'STEAM_0:0:638665069': 'soeren.hem',
-  };
-
   // Chart refs
   winRateChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('winRateChart');
   killsChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('killsChart');
@@ -966,7 +949,7 @@ export class StatisticsComponent {
 
   getDisplayName(steamId: string | null): string {
     if (!steamId) return 'Welt';
-    return this.steamIdDisplayNames[steamId] ?? steamId.replace('STEAM_', 'S:');
+    return steamId;
   }
 
   formatDuration(seconds: number): string {

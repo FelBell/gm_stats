@@ -27,7 +27,7 @@ class Round(db.Model):
     players = db.relationship('RoundPlayer', backref='round', lazy=True)
     buys = db.relationship('RoundBuy', backref='round', lazy=True)
 
-    def to_dict(self):
+    def to_dict(self, player_map=None):
         """Returns a dictionary representation of the Round."""
         return {
             'id': self.id,
@@ -35,9 +35,9 @@ class Round(db.Model):
             'winner': self.winner,
             'duration': self.duration,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
-            'kills': [k.to_dict() for k in self.kills],
-            'players': [p.to_dict() for p in self.players],
-            'buys': [b.to_dict() for b in self.buys]
+            'kills': [k.to_dict(player_map) for k in self.kills],
+            'players': [p.to_dict(player_map) for p in self.players],
+            'buys': [b.to_dict(player_map) for b in self.buys]
         }
 
 class RoundBuy(db.Model):
@@ -58,10 +58,14 @@ class RoundBuy(db.Model):
     role = db.Column(db.String(32))
     item = db.Column(db.String(64))
 
-    def to_dict(self):
+    def to_dict(self, player_map=None):
         """Returns a dictionary representation of the RoundBuy."""
+        steam_id = self.steam_id
+        if player_map and steam_id in player_map:
+            steam_id = player_map[steam_id]
+
         return {
-            'steam_id': self.steam_id,
+            'steam_id': steam_id,
             'role': self.role,
             'item': self.item
         }
@@ -86,10 +90,14 @@ class RoundPlayer(db.Model):
     karma_diff = db.Column(db.Integer)
     points_diff = db.Column(db.Integer)
 
-    def to_dict(self):
+    def to_dict(self, player_map=None):
         """Returns a dictionary representation of the RoundPlayer."""
+        steam_id = self.steam_id
+        if player_map and steam_id in player_map:
+            steam_id = player_map[steam_id]
+
         return {
-            'steam_id': self.steam_id,
+            'steam_id': steam_id,
             'role_start': self.role_start,
             'role_end': self.role_end,
             'karma_diff': self.karma_diff,
@@ -121,12 +129,20 @@ class Kill(db.Model):
     weapon = db.Column(db.String(64))
     headshot = db.Column(db.Boolean, default=False)
 
-    def to_dict(self):
+    def to_dict(self, player_map=None):
         """Returns a dictionary representation of the Kill."""
+        attacker_steamid = self.attacker_steamid
+        if player_map and attacker_steamid in player_map:
+            attacker_steamid = player_map[attacker_steamid]
+
+        victim_steamid = self.victim_steamid
+        if player_map and victim_steamid in player_map:
+            victim_steamid = player_map[victim_steamid]
+
         return {
-            'attacker_steamid': self.attacker_steamid,
+            'attacker_steamid': attacker_steamid,
             'attacker_role': self.attacker_role,
-            'victim_steamid': self.victim_steamid,
+            'victim_steamid': victim_steamid,
             'victim_role': self.victim_role,
             'weapon': self.weapon,
             'headshot': self.headshot

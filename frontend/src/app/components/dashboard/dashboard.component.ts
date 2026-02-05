@@ -15,23 +15,6 @@ import { environment } from '../../../environments/environment';
 export class DashboardComponent {
   private readonly apiUrl = environment.apiUrl;
 
-  // Hardcoded Steam ID to Display Name mapping
-  private readonly steamIdDisplayNames: Record<string, string> = {
-    'STEAM_0:0:130645458': 'Señor del Mapa',
-    'STEAM_0:1:619571923': 'cHoli',
-    'STEAM_0:0:504917834': 'gebrochen',
-    'STEAM_0:1:171849502': 'matze161',
-    'STEAM_0:1:949098480': 'Der Papa',
-    'STEAM_0:1:512869438': 'Toodels',
-    'STEAM_0:1:39907607': 'Lumien',
-    'STEAM_0:0:158949535': 'Sauron',
-    'STEAM_0:1:87186570': 'sim.lie',
-    'STEAM_0:0:140709318': '☭☭☭ Uppercut Ursula',
-    'STEAM_0:1:94263852': 'ben.liedel',
-    'STEAM_0:0:624153889': 'Mink',
-    'STEAM_0:0:638665069': 'soeren.hem',
-  };
-
   // Pagination signals
   currentPage = signal(0);
   pageSize = 20;
@@ -199,17 +182,12 @@ export class DashboardComponent {
 
   formatSteamId(steamId: string | null): string {
     if (!steamId) return 'Welt';
-    // Check if we have a display name for this Steam ID
-    if (this.steamIdDisplayNames[steamId]) {
-      return this.steamIdDisplayNames[steamId];
-    }
-    // Shorten for display
-    return steamId.replace('STEAM_', 'S:');
+    return steamId;
   }
 
   getDisplayName(steamId: string | null): string {
     if (!steamId) return 'Welt';
-    return this.steamIdDisplayNames[steamId] ?? steamId.replace('STEAM_', 'S:');
+    return steamId;
   }
 
   trackByRoundId(index: number, round: Round): string {
