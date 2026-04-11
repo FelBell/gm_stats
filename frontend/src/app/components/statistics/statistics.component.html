@@ -5,13 +5,13 @@
       <div class="header-left">
         <a routerLink="/" class="back-link">← Dashboard</a>
         <h1 class="logo">
-          <span class="logo-icon">📊</span>
+          <span class="logo-icon"><svg lucideBarChart3 [size]="28"></svg></span>
           Spieler Statistiken
         </h1>
       </div>
       <div class="header-actions">
         <button class="btn btn-refresh" (click)="refresh()" [disabled]="loading()">
-          <span class="btn-icon">🔄</span>
+          <span class="btn-icon"><svg lucideRefreshCw [size]="18"></svg></span>
           Aktualisieren
         </button>
       </div>
@@ -29,38 +29,73 @@
   <!-- Error State -->
   @if (error()) {
     <div class="error-container">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon"><svg lucideTriangleAlert [size]="48"></svg></div>
       <p>{{ error() }}</p>
       <button class="btn btn-primary" (click)="refresh()">Erneut versuchen</button>
     </div>
   }
 
   @if (!loading() && !error()) {
+    <!-- Filter Bar -->
+    <section class="filter-bar">
+      <div class="filter-bar-content">
+        <div class="filter-label">
+          <svg lucideFilter [size]="16"></svg>
+          Filter
+        </div>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label for="dateFrom">Von</label>
+            <input type="date" id="dateFrom" [ngModel]="dateFrom()" (ngModelChange)="onDateFromChange($event)" />
+          </div>
+          <div class="filter-group">
+            <label for="dateTo">Bis</label>
+            <input type="date" id="dateTo" [ngModel]="dateTo()" (ngModelChange)="onDateToChange($event)" />
+          </div>
+          <div class="filter-group session-group">
+            <label for="sessionPicker">Session</label>
+            <select id="sessionPicker" [ngModel]="selectedSession()" (ngModelChange)="selectSession($event)">
+              <option [ngValue]="null">Alle Sessions</option>
+              @for (session of sessions(); track session.label) {
+                <option [ngValue]="session.label">{{ session.label }} ({{ session.rounds }} Runden)</option>
+              }
+            </select>
+          </div>
+        </div>
+        @if (dateFrom() || dateTo() || selectedSession()) {
+          <button class="btn-clear" (click)="clearFilters()">
+            <svg lucideX [size]="14"></svg>
+            Zurücksetzen
+          </button>
+        }
+      </div>
+    </section>
+
     <!-- Global Stats Overview -->
     <section class="global-stats">
       <div class="stat-card">
-        <div class="stat-icon">🎮</div>
+        <div class="stat-icon"><svg lucideGamepad2 [size]="28"></svg></div>
         <div class="stat-content">
           <span class="stat-value">{{ totalRounds() }}</span>
           <span class="stat-label">Gesamt Runden</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon"><svg lucideUsers [size]="28"></svg></div>
         <div class="stat-content">
           <span class="stat-value">{{ totalPlayers() }}</span>
           <span class="stat-label">Spieler</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">💀</div>
+        <div class="stat-icon"><svg lucideSkull [size]="28"></svg></div>
         <div class="stat-content">
           <span class="stat-value">{{ totalKills() }}</span>
           <span class="stat-label">Gesamt Kills</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">⏱️</div>
+        <div class="stat-icon"><svg lucideClock [size]="28"></svg></div>
         <div class="stat-content">
           <span class="stat-value">{{ formatDuration(avgRoundDuration()) }}</span>
           <span class="stat-label">⌀ Rundendauer</span>
@@ -68,67 +103,14 @@
       </div>
     </section>
 
-    <!-- Charts Section -->
-    <section class="charts-section">
-      <div class="charts-grid">
-        <!-- Win Rate Chart -->
-        <div class="chart-card">
-          <h3>🏆 Siege nach Team</h3>
-          <div class="chart-container">
-            <canvas #winRateChart></canvas>
-          </div>
-        </div>
-
-        <!-- Top Killers Chart -->
-        <div class="chart-card">
-          <h3>💀 Top Killer</h3>
-          <div class="chart-container">
-            <canvas #killsChart></canvas>
-          </div>
-        </div>
-
-        <!-- Weapon Stats Chart -->
-        <div class="chart-card">
-          <h3>🔫 Beliebteste Waffen</h3>
-          <div class="chart-container">
-            <canvas #weaponsChart></canvas>
-          </div>
-        </div>
-
-        <!-- Activity Chart -->
-        <div class="chart-card">
-          <h3>📅 Aktivität nach Wochentag</h3>
-          <div class="chart-container">
-            <canvas #activityChart></canvas>
-          </div>
-        </div>
-
-        <!-- Role Distribution Chart -->
-        <div class="chart-card large">
-          <h3>🎭 Rollenverteilung</h3>
-          <div class="chart-container">
-            <canvas #rolesChart></canvas>
-          </div>
-        </div>
-
-        <!-- Map Stats Chart -->
-        <div class="chart-card large">
-          <h3>🗺️ Siege nach Map</h3>
-          <div class="chart-container">
-            <canvas #mapsChart></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Leaderboards Section -->
     <section class="leaderboards-section">
-      <h2 class="section-title">🏅 Bestenlisten</h2>
+      <h2 class="section-title"><svg lucideMedal [size]="22"></svg> Bestenlisten</h2>
 
       <div class="leaderboards-grid">
         <!-- Top Killers -->
         <div class="leaderboard-card">
-          <h3>💀 Beste Kills/Runde</h3>
+          <h3><svg lucideSkull [size]="18"></svg> Beste Kills/Runde</h3>
           <div class="leaderboard-list">
             @for (player of topKillers(); track player.steamId; let i = $index) {
               <div class="leaderboard-item">
@@ -149,7 +131,7 @@
 
         <!-- Best K/D -->
         <div class="leaderboard-card">
-          <h3>⚔️ Beste K/D</h3>
+          <h3><svg lucideSwords [size]="18"></svg> Beste K/D</h3>
           <div class="leaderboard-list">
             @for (player of bestKD(); track player.steamId; let i = $index) {
               <div class="leaderboard-item">
@@ -170,7 +152,7 @@
 
         <!-- Best Headshot Rate -->
         <div class="leaderboard-card">
-          <h3>🎯 Beste Headshot Rate</h3>
+          <h3><svg lucideTarget [size]="18"></svg> Beste Headshot Rate</h3>
           <div class="leaderboard-list">
             @for (player of bestHeadshotRate(); track player.steamId; let i = $index) {
               <div class="leaderboard-item">
@@ -192,7 +174,7 @@
         <!-- Most Teamkills -->
         @if (mostTeamkills().length > 0) {
           <div class="leaderboard-card shame">
-            <h3>🔪 Teamkiller des Jahres</h3>
+            <h3><svg lucideSword [size]="18"></svg> Teamkiller des Jahres</h3>
             <div class="leaderboard-list">
               @for (player of mostTeamkills(); track player.steamId; let i = $index) {
                 <div class="leaderboard-item">
@@ -207,7 +189,7 @@
 
         <!-- Best Avg Karma per Round -->
         <div class="leaderboard-card karma-good">
-          <h3>✨ Bestes Karma/Runde</h3>
+          <h3><svg lucideSparkles [size]="18"></svg> Bestes Karma/Runde</h3>
           <div class="leaderboard-list">
             @for (player of avgKarmaPerRound(); track player.steamId; let i = $index) {
               <div class="leaderboard-item">
@@ -234,7 +216,7 @@
 
         <!-- Worst Avg Karma per Round -->
         <div class="leaderboard-card shame">
-          <h3>💀 Schlechtestes Karma/Runde</h3>
+          <h3><svg lucideSkull [size]="18"></svg> Schlechtestes Karma/Runde</h3>
           <div class="leaderboard-list">
             @for (player of worstAvgKarmaPerRound(); track player.steamId; let i = $index) {
               <div class="leaderboard-item">
@@ -254,14 +236,137 @@
       </div>
     </section>
 
+    <!-- Role Leaderboards Section -->
+    <section class="leaderboards-section">
+      <h2 class="section-title"><svg lucideDrama [size]="22"></svg> Rollen Bestenlisten</h2>
+
+      <div class="leaderboards-grid">
+        <!-- Best Innocent -->
+        <div class="leaderboard-card role-card-innocent">
+          <h3><svg lucideShield [size]="18"></svg> Bester Innocent</h3>
+          <div class="leaderboard-list">
+            @for (player of bestInnocent(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span class="player-stat">{{ player.winRate }}%</span>
+              </div>
+            }
+            @if (bestInnocent().length === 0) {
+              <div class="pair-empty">Nicht genug Daten</div>
+            }
+          </div>
+        </div>
+
+        <!-- Best Traitor -->
+        <div class="leaderboard-card role-card-traitor">
+          <h3><svg lucideFlame [size]="18"></svg> Bester Traitor</h3>
+          <div class="leaderboard-list">
+            @for (player of bestTraitor(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span class="player-stat">{{ player.winRate }}%</span>
+              </div>
+            }
+            @if (bestTraitor().length === 0) {
+              <div class="pair-empty">Nicht genug Daten</div>
+            }
+          </div>
+        </div>
+
+        <!-- Best Detective -->
+        <div class="leaderboard-card role-card-detective">
+          <h3><svg lucideSearch [size]="18"></svg> Bester Detective</h3>
+          <div class="leaderboard-list">
+            @for (player of bestDetective(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span class="player-stat">{{ player.winRate }}%</span>
+              </div>
+            }
+            @if (bestDetective().length === 0) {
+              <div class="pair-empty">Nicht genug Daten</div>
+            }
+          </div>
+        </div>
+
+        <!-- Best Jackal -->
+        <div class="leaderboard-card role-card-jackal">
+          <h3><svg lucideDog [size]="18"></svg> Bester Jackal</h3>
+          <div class="leaderboard-list">
+            @for (player of bestJackal(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span class="player-stat">{{ player.winRate }}%</span>
+              </div>
+            }
+            @if (bestJackal().length === 0) {
+              <div class="pair-empty">Nicht genug Daten</div>
+            }
+          </div>
+        </div>
+
+        <!-- Best Sidekick -->
+        <div class="leaderboard-card role-card-sidekick">
+          <h3><svg lucideBird [size]="18"></svg> Bester Sidekick</h3>
+          <div class="leaderboard-list">
+            @for (player of bestSidekick(); track player.steamId; let i = $index) {
+              <div class="leaderboard-item">
+                <span class="rank" [class.gold]="i === 0" [class.silver]="i === 1" [class.bronze]="i === 2">{{ i + 1 }}</span>
+                <span class="player-name">{{ player.displayName }}</span>
+                <span class="player-stat">{{ player.winRate }}%</span>
+              </div>
+            }
+            @if (bestSidekick().length === 0) {
+              <div class="pair-empty">Nicht genug Daten</div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fun Awards Section -->
+    <section class="awards-section">
+      <h2 class="section-title"><svg lucideTrophy [size]="22"></svg> Fun Awards</h2>
+      <div class="awards-grid">
+        @for (award of funAwards(); track award.title) {
+          <div class="award-card" [style.--award-color]="award.color">
+            <div class="award-icon-wrapper">
+              @if (award.icon === 'zap') { <svg lucideZap [size]="24"></svg> }
+              @if (award.icon === 'ghost') { <svg lucideGhost [size]="24"></svg> }
+              @if (award.icon === 'shopping-cart') { <svg lucideShoppingCart [size]="24"></svg> }
+              @if (award.icon === 'crosshair') { <svg lucideCrosshair [size]="24"></svg> }
+              @if (award.icon === 'wrench') { <svg lucideWrench [size]="24"></svg> }
+              @if (award.icon === 'heart-pulse') { <svg lucideHeartPulse [size]="24"></svg> }
+              @if (award.icon === 'smile') { <svg lucideSmile [size]="24"></svg> }
+            </div>
+            <div class="award-info">
+              <h3 class="award-title">{{ award.title }}</h3>
+              <div class="award-winner">{{ award.winner }}</div>
+              <div class="award-details">
+                <span class="award-value">{{ award.value }}</span>
+                <span class="award-desc">{{ award.description }}</span>
+              </div>
+            </div>
+          </div>
+        }
+        @if (funAwards().length === 0) {
+          <div class="pair-empty" style="grid-column: 1 / -1;">Nicht genug Daten für Awards</div>
+        }
+      </div>
+    </section>
+
     <!-- Player Pairs Section -->
     <section class="pairs-section">
-      <h2 class="section-title">👫 Spieler-Paare</h2>
+      <h2 class="section-title"><svg lucideUsers [size]="22"></svg> Spieler-Paare</h2>
 
       <div class="pairs-grid">
         <!-- Best Teammates -->
         <div class="pair-card good">
-          <h3>🤝 Dream Team</h3>
+          <h3><svg lucideHandshake [size]="18"></svg> Dream Team</h3>
           <p class="pair-description">Beste Winrate als Teammates</p>
           <div class="pair-list">
             @for (
@@ -306,7 +411,7 @@
 
         <!-- Worst Teammates -->
         <div class="pair-card bad">
-          <h3>💔 Pechvögel</h3>
+          <h3><svg lucideHeartCrack [size]="18"></svg> Pechvögel</h3>
           <p class="pair-description">Niedrigste Winrate als Teammates</p>
           <div class="pair-list">
             @for (
@@ -344,7 +449,7 @@
 
         <!-- Nemesis Pairs -->
         <div class="pair-card nemesis">
-          <h3>😈 Nemesis</h3>
+          <h3><svg lucideFlame [size]="18"></svg> Nemesis</h3>
           <p class="pair-description">Wer tötet wen am meisten?</p>
           <div class="pair-list">
             @for (
@@ -362,7 +467,7 @@
                 <div class="pair-stats">
                   <span class="kill-count">{{ pair.kills }} Kills</span>
                   @if (pair.headshots > 0) {
-                    <span class="headshot-count">🎯 {{ pair.headshots }}</span>
+                    <span class="headshot-count"><svg lucideTarget [size]="14"></svg> {{ pair.headshots }}</span>
                   }
                 </div>
               </div>
@@ -384,7 +489,7 @@
 
         <!-- Rivalries -->
         <div class="pair-card rivalry">
-          <h3>⚔️ Rivalitäten</h3>
+          <h3><svg lucideSwords [size]="18"></svg> Rivalitäten</h3>
           <p class="pair-description">Gegenseitige Kills</p>
           <div class="pair-list">
             @for (
@@ -427,7 +532,7 @@
 
         <!-- Frequent Duos -->
         <div class="pair-card frequent">
-          <h3>👯 Häufige Mitspieler</h3>
+          <h3><svg lucideUserPlus [size]="18"></svg> Häufige Mitspieler</h3>
           <p class="pair-description">Am meisten zusammen gespielt</p>
           <div class="pair-list">
             @for (
@@ -473,7 +578,7 @@
 
     <!-- Player Cards Section -->
     <section class="players-section">
-      <h2 class="section-title">👥 Alle Spieler</h2>
+      <h2 class="section-title"><svg lucideUsers [size]="22"></svg> Alle Spieler</h2>
 
       <div class="players-grid">
         @for (player of playerStats(); track player.steamId) {
@@ -529,16 +634,16 @@
             <div class="player-extras">
               @if (player.favoriteWeapon) {
                 <div class="extra-item">
-                  <span class="extra-label">🔫 Lieblingswaffe</span>
+                  <span class="extra-label"><svg lucideCrosshair [size]="14"></svg> Lieblingswaffe</span>
                   <span class="extra-value">{{ player.favoriteWeapon }}</span>
                 </div>
               }
               <div class="extra-item">
-                <span class="extra-label">🛒 Items gekauft</span>
+                <span class="extra-label"><svg lucideShoppingCart [size]="14"></svg> Items gekauft</span>
                 <span class="extra-value">{{ player.itemsBought }}</span>
               </div>
               <div class="extra-item">
-                <span class="extra-label">✨ Karma</span>
+                <span class="extra-label"><svg lucideSparkles [size]="14"></svg> Karma</span>
                 <span
                   class="extra-value"
                   [class.positive]="player.karmaTotal > 0"
@@ -548,7 +653,7 @@
                 </span>
               </div>
               <div class="extra-item">
-                <span class="extra-label">⭐ Punkte</span>
+                <span class="extra-label"><svg lucideStar [size]="14"></svg> Punkte</span>
                 <span
                   class="extra-value"
                   [class.positive]="player.pointsTotal > 0"
@@ -575,9 +680,39 @@
       </div>
     </section>
 
+    <!-- Charts Section -->
+    <section class="charts-section">
+      <div class="charts-grid">
+
+        <!-- Weapon Stats Chart -->
+        <div class="chart-card">
+          <h3><svg lucideCrosshair [size]="18"></svg> Beliebteste Waffen</h3>
+          <div class="chart-container">
+            <canvas #weaponsChart></canvas>
+          </div>
+        </div>
+
+        <!-- Role Distribution Chart -->
+        <div class="chart-card large">
+          <h3><svg lucideDrama [size]="18"></svg> Rollenverteilung</h3>
+          <div class="chart-container">
+            <canvas #rolesChart></canvas>
+          </div>
+        </div>
+
+        <!-- Map Stats Chart -->
+        <div class="chart-card large">
+          <h3><svg lucideMap [size]="18"></svg> Siege nach Map</h3>
+          <div class="chart-container">
+            <canvas #mapsChart></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Weapon Stats Table -->
     <section class="weapons-section">
-      <h2 class="section-title">🔫 Waffen Statistiken</h2>
+      <h2 class="section-title"><svg lucideCrosshair [size]="22"></svg> Waffen Statistiken</h2>
 
       <div class="weapons-table">
         <div class="table-header">
@@ -599,7 +734,7 @@
 
     <!-- Map Stats Table -->
     <section class="maps-section">
-      <h2 class="section-title">🗺️ Map Statistiken</h2>
+      <h2 class="section-title"><svg lucideMap [size]="22"></svg> Map Statistiken</h2>
 
       <div class="maps-table">
         <div class="table-header">
