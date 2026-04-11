@@ -11,11 +11,41 @@ import {
   runInInjectionContext,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { httpResource } from '@angular/common/http';
 import { Round } from '../../models/stats.model';
 import { environment } from '../../../environments/environment';
 import { Chart, registerables } from 'chart.js';
+import {
+  LucideBarChart3,
+  LucideRefreshCw,
+  LucideTriangleAlert,
+  LucideGamepad2,
+  LucideUsers,
+  LucideSkull,
+  LucideClock,
+  LucideMedal,
+  LucideSwords,
+  LucideTarget,
+  LucideSword,
+  LucideSparkles,
+  LucideDrama,
+  LucideShield,
+  LucideFlame,
+  LucideSearch,
+  LucideDog,
+  LucideBird,
+  LucideHandshake,
+  LucideHeartCrack,
+  LucideUserPlus,
+  LucideCrosshair,
+  LucideShoppingCart,
+  LucideStar,
+  LucideMap,
+  LucideFilter,
+  LucideX,
+} from '@lucide/angular';
 
 Chart.register(...registerables);
 
@@ -39,6 +69,7 @@ interface PlayerStats {
   rolesPlayed: Record<string, number>;
   killsPerRound: number;
   teamkills: number;
+  roleStats: Record<string, { rounds: number; wins: number }>;
 }
 
 interface WeaponStats {
@@ -87,7 +118,38 @@ interface RivalryStats {
 @Component({
   selector: 'app-statistics',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    LucideBarChart3,
+    LucideRefreshCw,
+    LucideTriangleAlert,
+    LucideGamepad2,
+    LucideUsers,
+    LucideSkull,
+    LucideClock,
+    LucideMedal,
+    LucideSwords,
+    LucideTarget,
+    LucideSword,
+    LucideSparkles,
+    LucideDrama,
+    LucideShield,
+    LucideFlame,
+    LucideSearch,
+    LucideDog,
+    LucideBird,
+    LucideHandshake,
+    LucideHeartCrack,
+    LucideUserPlus,
+    LucideCrosshair,
+    LucideShoppingCart,
+    LucideStar,
+    LucideMap,
+    LucideFilter,
+    LucideX,
+  ],
   templateUrl: './statistics.component.html',
   styleUrl: './statistics.component.scss',
 })
@@ -110,13 +172,11 @@ export class StatisticsComponent {
     'STEAM_0:1:94263852': 'ben.liedel',
     'STEAM_0:0:624153889': 'Mink',
     'STEAM_0:0:638665069': 'soeren.hem',
+    'STEAM_0:1:597797310': 'Spinatlasagne',
   };
 
   // Chart refs
-  winRateChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('winRateChart');
-  killsChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('killsChart');
   weaponsChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('weaponsChart');
-  activityChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('activityChart');
   rolesChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('rolesChart');
   mapsChartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('mapsChart');
 
@@ -152,8 +212,86 @@ export class StatisticsComponent {
       : null,
   );
 
-  // Computed statistics
-  rounds = computed(() => this.roundsResource.value() ?? []);
+  // ========== TIME-SPAN FILTER ==========
+  dateFrom = signal<string | null>(null);
+  dateTo = signal<string | null>(null);
+  selectedSession = signal<string | null>(null);
+
+  // Detect sessions: groups of rounds where consecutive rounds are < 2 hours apart
+  sessions = computed(() => {
+    const allRounds = (this.roundsResource.value() ?? []).filter((r) => r.players.length >= 6);
+    if (allRounds.length === 0) return [];
+
+    // Sort rounds by timestamp ascending
+    const sorted = [...allRounds].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+    );
+
+    const GAP_MS = 2 * 60 * 60 * 1000; // 2 hours
+    const sessionGroups: { start: Date; end: Date; rounds: number }[] = [];
+    let sessionStart = new Date(sorted[0].timestamp);
+    let sessionEnd = new Date(sorted[0].timestamp);
+    let sessionRounds = 1;
+
+    for (let i = 1; i < sorted.length; i++) {
+      const roundTime = new Date(sorted[i].timestamp);
+      if (roundTime.getTime() - sessionEnd.getTime() > GAP_MS) {
+        // New session
+        sessionGroups.push({ start: sessionStart, end: sessionEnd, rounds: sessionRounds });
+        sessionStart = roundTime;
+        sessionEnd = roundTime;
+        sessionRounds = 1;
+      } else {
+        sessionEnd = roundTime;
+        sessionRounds++;
+      }
+    }
+    sessionGroups.push({ start: sessionStart, end: sessionEnd, rounds: sessionRounds });
+
+    // Format labels — use the session start date, mapped to Thursday if applicable
+    const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+    return sessionGroups
+      .map((s) => {
+        const d = s.start;
+        const dayName = dayNames[d.getDay()];
+        const dateStr = d.toLocaleDateString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+        return {
+          label: `${dayName}, ${dateStr}`,
+          startISO: s.start.toISOString(),
+          endISO: s.end.toISOString(),
+          rounds: s.rounds,
+        };
+      })
+      .reverse(); // Newest first
+  });
+
+  // Computed statistics — applies date and player count filters
+  rounds = computed(() => {
+    const allRounds = this.roundsResource.value() ?? [];
+
+    // Apply date range filter
+    const from = this.dateFrom();
+    const to = this.dateTo();
+    let dateFiltered = allRounds;
+    if (from) {
+      const fromDate = new Date(from);
+      fromDate.setHours(0, 0, 0, 0);
+      dateFiltered = dateFiltered.filter((r) => new Date(r.timestamp) >= fromDate);
+    }
+    if (to) {
+      const toDate = new Date(to);
+      toDate.setHours(23, 59, 59, 999);
+      dateFiltered = dateFiltered.filter((r) => new Date(r.timestamp) <= toDate);
+    }
+
+    // Apply player count filter
+    const filtered = dateFiltered.filter((r) => r.players.length >= 6);
+    return filtered;
+  });
   totalRounds = computed(() => this.rounds().length);
   totalKills = computed(() => this.rounds().reduce((sum, r) => sum + r.kills.length, 0));
   totalPlayers = computed(() => {
@@ -191,6 +329,7 @@ export class StatisticsComponent {
             rolesPlayed: {},
             killsPerRound: 0,
             teamkills: 0,
+            roleStats: {},
           });
         }
       });
@@ -208,20 +347,36 @@ export class StatisticsComponent {
         const role = player.role_start?.toLowerCase() || 'unknown';
         stats.rolesPlayed[role] = (stats.rolesPlayed[role] || 0) + 1;
 
+        const roleEnd = player.role_end?.toLowerCase() || role;
+
+        if (!stats.roleStats[role]) stats.roleStats[role] = { rounds: 0, wins: 0 };
+        stats.roleStats[role].rounds++;
+
+        if (roleEnd !== role) {
+          if (!stats.roleStats[roleEnd]) stats.roleStats[roleEnd] = { rounds: 0, wins: 0 };
+          stats.roleStats[roleEnd].rounds++;
+        }
+
         // Karma and points
         if (player.karma_diff !== null) stats.karmaTotal += player.karma_diff;
         if (player.points_diff !== null) stats.pointsTotal += player.points_diff;
 
         // Check if player won this round
-        const isInnocent = this.isInnocentRole(player.role_start);
-        const isTraitor = this.isTraitorRole(player.role_start);
+        const wonAtEnd = this.playerWon(winningTeam, roleEnd);
 
-        if (winningTeam === 'innocents' && isInnocent) {
-          stats.winsAsInnocent++;
+        if (wonAtEnd) {
           stats.totalWins++;
-        } else if (winningTeam === 'traitors' && isTraitor) {
-          stats.winsAsTraitor++;
-          stats.totalWins++;
+          if (this.isInnocentRole(roleEnd)) {
+            stats.winsAsInnocent++;
+          } else if (this.isTraitorRole(roleEnd)) {
+            stats.winsAsTraitor++;
+          }
+
+          if (roleEnd !== role) {
+            stats.roleStats[roleEnd].wins++;
+          } else {
+            stats.roleStats[role].wins++;
+          }
         }
       });
 
@@ -337,20 +492,6 @@ export class StatisticsComponent {
     return Array.from(mapMap.values()).sort((a, b) => b.roundsPlayed - a.roundsPlayed);
   });
 
-  // Activity by day of week
-  activityByDay = computed(() => {
-    const rounds = this.rounds();
-    const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-    const counts = new Array(7).fill(0);
-
-    rounds.forEach((round) => {
-      const date = new Date(round.timestamp);
-      counts[date.getDay()]++;
-    });
-
-    return days.map((day, index) => ({ day, count: counts[index] }));
-  });
-
   // Role distribution
   roleDistribution = computed(() => {
     const rounds = this.rounds();
@@ -424,14 +565,31 @@ export class StatisticsComponent {
       .slice(0, 5),
   );
 
-  // Win statistics
-  winStats = computed(() => {
-    const rounds = this.rounds();
-    const innocent = rounds.filter((r) => r.winner?.toLowerCase() === 'innocents').length;
-    const traitor = rounds.filter((r) => r.winner?.toLowerCase() === 'traitors').length;
-    const other = rounds.length - innocent - traitor;
-    return { innocent, traitor, other };
-  });
+  // Specific role leaderboards
+  bestInnocent = computed(() => this.getBestByRole('innocent', 5));
+  bestTraitor = computed(() => this.getBestByRole('traitor', 5));
+  bestDetective = computed(() => this.getBestByRole('detective', 3));
+  bestJackal = computed(() => this.getBestByRole('jackal', 3));
+  bestSidekick = computed(() => this.getBestByRole('sidekick', 2));
+
+  private getBestByRole(role: string, minRounds: number) {
+    return [...this.playerStats()]
+      .filter((p) => (p.roleStats[role]?.rounds || 0) >= minRounds)
+      .map((p) => {
+        const rounds = p.roleStats[role].rounds;
+        const wins = p.roleStats[role].wins;
+        const wr = Math.round((wins / rounds) * 1000) / 10;
+        return {
+          steamId: p.steamId,
+          displayName: p.displayName,
+          rounds,
+          wins,
+          winRate: wr,
+        };
+      })
+      .sort((a, b) => b.winRate - a.winRate || b.rounds - a.rounds)
+      .slice(0, 5);
+  }
 
   // Average round duration
   avgRoundDuration = computed(() => {
@@ -652,6 +810,10 @@ export class StatisticsComponent {
           const rounds = this.rounds();
           if (rounds.length > 0) {
             setTimeout(() => this.initCharts(), 100);
+            const missingIds = Array.from(
+              new Set(rounds.flatMap((r) => r.players.map((p) => p.steam_id))),
+            ).filter((id) => id && !this.steamIdDisplayNames[id]);
+            console.log('Missing Steam IDs:', missingIds);
           }
         });
       });
@@ -663,92 +825,9 @@ export class StatisticsComponent {
     this.charts.forEach((chart) => chart.destroy());
     this.charts = [];
 
-    this.createWinRateChart();
-    this.createKillsChart();
     this.createWeaponsChart();
-    this.createActivityChart();
     this.createRolesChart();
     this.createMapsChart();
-  }
-
-  private createWinRateChart(): void {
-    const canvas = this.winRateChartCanvas()?.nativeElement;
-    if (!canvas) return;
-
-    const stats = this.winStats();
-    const chart = new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels: ['Innocents', 'Traitors', 'Andere'],
-        datasets: [
-          {
-            data: [stats.innocent, stats.traitor, stats.other],
-            backgroundColor: ['#4ade80', '#f87171', '#94a3b8'],
-            borderWidth: 0,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: '#e4e4eb', padding: 20 },
-          },
-        },
-      },
-    });
-    this.charts.push(chart);
-  }
-
-  private createKillsChart(): void {
-    const canvas = this.killsChartCanvas()?.nativeElement;
-    if (!canvas) return;
-
-    const topPlayers = this.topKillers();
-    const chart = new Chart(canvas, {
-      type: 'bar',
-      data: {
-        labels: topPlayers.map((p) => p.displayName),
-        datasets: [
-          {
-            label: 'Kills/Runde',
-            data: topPlayers.map((p) => p.killsPerRound),
-            backgroundColor: '#6366f1',
-            borderRadius: 4,
-          },
-          {
-            label: 'K/D',
-            data: topPlayers.map((p) => p.kd),
-            backgroundColor: '#a855f7',
-            borderRadius: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        indexAxis: 'y',
-        scales: {
-          x: {
-            grid: { color: '#2a2a3a' },
-            ticks: { color: '#9090a0' },
-          },
-          y: {
-            grid: { display: false },
-            ticks: { color: '#e4e4eb' },
-          },
-        },
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { color: '#e4e4eb' },
-          },
-        },
-      },
-    });
-    this.charts.push(chart);
   }
 
   private createWeaponsChart(): void {
@@ -790,49 +869,6 @@ export class StatisticsComponent {
     this.charts.push(chart);
   }
 
-  private createActivityChart(): void {
-    const canvas = this.activityChartCanvas()?.nativeElement;
-    if (!canvas) return;
-
-    const activity = this.activityByDay();
-    const chart = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels: activity.map((a) => a.day),
-        datasets: [
-          {
-            label: 'Runden',
-            data: activity.map((a) => a.count),
-            borderColor: '#6366f1',
-            backgroundColor: 'rgba(99, 102, 241, 0.2)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#6366f1',
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#9090a0' },
-          },
-          y: {
-            grid: { color: '#2a2a3a' },
-            ticks: { color: '#e4e4eb' },
-            beginAtZero: true,
-          },
-        },
-        plugins: {
-          legend: { display: false },
-        },
-      },
-    });
-    this.charts.push(chart);
-  }
-
   private createRolesChart(): void {
     const canvas = this.rolesChartCanvas()?.nativeElement;
     if (!canvas) return;
@@ -849,6 +885,8 @@ export class StatisticsComponent {
       killer: '#ef4444',
       drunk: '#fcd34d',
       clown: '#fb923c',
+      jackal: '#0cbaba',
+      sidekick: '#0b9e9e',
     };
 
     const chart = new Chart(canvas, {
@@ -964,6 +1002,21 @@ export class StatisticsComponent {
     return (attackerInnocent && victimInnocent) || (attackerTraitor && victimTraitor);
   }
 
+  private playerWon(winningTeam: string | undefined, role: string | null): boolean {
+    if (!winningTeam || !role) return false;
+    const team = winningTeam.toLowerCase();
+    const r = role.toLowerCase();
+
+    if (team === 'innocents' && this.isInnocentRole(r)) return true;
+    if (team === 'traitors' && this.isTraitorRole(r)) return true;
+    if ((team === 'jackal' || team === 'jackals') && ['jackal', 'sidekick'].includes(r))
+      return true;
+    if (team === 'jester' && ['jester', 'swapper', 'clown', 'beggar'].includes(r)) return true;
+    if (team === r) return true; // e.g. winner === 'killer' and role === 'killer'
+
+    return false;
+  }
+
   getDisplayName(steamId: string | null): string {
     if (!steamId) return 'Welt';
     return this.steamIdDisplayNames[steamId] ?? steamId.replace('STEAM_', 'S:');
@@ -979,14 +1032,60 @@ export class StatisticsComponent {
     if (!role) return 'role-unknown';
     const normalized = role.toLowerCase();
 
+    // Detective gets its own color (dark blue)
+    if (normalized === 'detective') return 'role-detective';
     if (this.isInnocentRole(role)) return 'role-innocent';
     if (this.isTraitorRole(role)) return 'role-traitor';
     if (['jester', 'swapper', 'clown', 'beggar'].includes(normalized)) return 'role-jester';
+    if (['jackal'].includes(normalized)) return 'role-jackal';
+    if (['sidekick'].includes(normalized)) return 'role-sidekick';
     if (['killer', 'oldman', 'drunk', 'revenger'].includes(normalized)) return 'role-independent';
     return 'role-unknown';
   }
 
   refresh(): void {
     this.roundsResource.reload();
+  }
+
+  // ========== FILTER METHODS ==========
+  onDateFromChange(value: string): void {
+    this.dateFrom.set(value || null);
+    this.selectedSession.set(null);
+  }
+
+  onDateToChange(value: string): void {
+    this.dateTo.set(value || null);
+    this.selectedSession.set(null);
+  }
+
+  selectSession(label: string | null): void {
+    this.selectedSession.set(label);
+    if (!label) {
+      this.dateFrom.set(null);
+      this.dateTo.set(null);
+      return;
+    }
+    const session = this.sessions().find((s) => s.label === label);
+    if (session) {
+      // Set date range to session bounds
+      const startDate = new Date(session.startISO);
+      const endDate = new Date(session.endISO);
+      // Format as YYYY-MM-DD for date inputs
+      this.dateFrom.set(this.formatDateInput(startDate));
+      this.dateTo.set(this.formatDateInput(endDate));
+    }
+  }
+
+  clearFilters(): void {
+    this.dateFrom.set(null);
+    this.dateTo.set(null);
+    this.selectedSession.set(null);
+  }
+
+  private formatDateInput(date: Date): string {
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }

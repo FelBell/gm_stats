@@ -3,12 +3,12 @@
   <header class="header">
     <div class="header-content">
       <h1 class="logo">
-        <span class="logo-icon">🔫</span>
+        <span class="logo-icon"><svg lucideCrosshair [size]="28"></svg></span>
         TTT Stats
       </h1>
       <div class="header-actions">
         <a routerLink="/statistics" class="btn btn-stats">
-          <span class="btn-icon">📊</span>
+          <span class="btn-icon"><svg lucideBarChart3 [size]="18"></svg></span>
           Statistiken
         </a>
         <div
@@ -26,7 +26,7 @@
           }}
         </div>
         <button class="btn btn-refresh" (click)="refresh()" [disabled]="loading()">
-          <span class="btn-icon">🔄</span>
+          <span class="btn-icon"><svg lucideRefreshCw [size]="18"></svg></span>
           Aktualisieren
         </button>
       </div>
@@ -36,28 +36,28 @@
   <!-- Stats Overview -->
   <section class="stats-overview">
     <div class="stat-card">
-      <div class="stat-icon">🎮</div>
+      <div class="stat-icon"><svg lucideGamepad2 [size]="28"></svg></div>
       <div class="stat-content">
         <span class="stat-value">{{ totalRounds() }}</span>
         <span class="stat-label">Runden</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">💀</div>
+      <div class="stat-icon"><svg lucideSkull [size]="28"></svg></div>
       <div class="stat-content">
         <span class="stat-value">{{ totalKills() }}</span>
         <span class="stat-label">Kills</span>
       </div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon">🎯</div>
+      <div class="stat-icon"><svg lucideTarget [size]="28"></svg></div>
       <div class="stat-content">
         <span class="stat-value">{{ headshotRate() }}%</span>
         <span class="stat-label">Headshot Rate</span>
       </div>
     </div>
     <div class="stat-card winner-stats">
-      <div class="stat-icon">🏆</div>
+      <div class="stat-icon"><svg lucideTrophy [size]="28"></svg></div>
       <div class="stat-content">
         <div class="winner-breakdown">
           <span class="winner-innocent">{{ winStats().innocent }} Innocent</span>
@@ -82,7 +82,7 @@
   <!-- Error State -->
   @if (error()) {
     <div class="error-container">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon"><svg lucideTriangleAlert [size]="48"></svg></div>
       <p>{{ error() }}</p>
       <button class="btn btn-primary" (click)="refresh()">Erneut versuchen</button>
     </div>
@@ -95,14 +95,14 @@
 
       @if (rounds().length === 0 && !loading()) {
         <div class="empty-state">
-          <div class="empty-icon">📭</div>
+          <div class="empty-icon"><svg lucideInbox [size]="48"></svg></div>
           <p>Noch keine Runden aufgezeichnet.</p>
         </div>
       }
 
       <div class="rounds-grid">
         @for (round of rounds(); track trackByRoundId($index, round)) {
-          <div class="round-card" (click)="selectRound(round)">
+          <div class="round-card" (click)="selectRound(round)" [style.--map-bg]="'url(/map_icons/' + round.map_name + '.png)'">
             <div class="round-header">
               <span class="round-map">{{ round.map_name || 'Unbekannte Map' }}</span>
               <span class="round-winner" [ngClass]="getWinnerClass(round.winner)">
@@ -110,21 +110,21 @@
               </span>
             </div>
             <div class="round-meta">
-              <span class="round-duration">⏱️ {{ formatDuration(round.duration) }}</span>
-              <span class="round-timestamp">📅 {{ formatTimestamp(round.timestamp) }}</span>
+              <span class="round-duration"><svg lucideClock [size]="14"></svg> {{ formatDuration(round.duration) }}</span>
+              <span class="round-timestamp"><svg lucideCalendar [size]="14"></svg> {{ formatTimestamp(round.timestamp) }}</span>
             </div>
             <div class="round-stats">
               <span class="round-stat">
-                <span class="stat-emoji">👥</span>
+                <span class="stat-emoji"><svg lucideUsers [size]="14"></svg></span>
                 {{ round.players.length }} Spieler
               </span>
               <span class="round-stat">
-                <span class="stat-emoji">💀</span>
+                <span class="stat-emoji"><svg lucideSkull [size]="14"></svg></span>
                 {{ round.kills.length }} Kills
               </span>
               @if (round.buys.length > 0) {
                 <span class="round-stat">
-                  <span class="stat-emoji">🛒</span>
+                  <span class="stat-emoji"><svg lucideShoppingCart [size]="14"></svg></span>
                   {{ round.buys.length }} Käufe
                 </span>
               }
@@ -155,21 +155,23 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <button class="modal-close" (click)="closeDetail()">✕</button>
 
-      <div class="modal-header">
-        <h2>{{ selectedRound()!.map_name || 'Unbekannte Map' }}</h2>
-        <span class="modal-winner" [ngClass]="getWinnerClass(selectedRound()!.winner)">
-          {{ getWinnerLabel(selectedRound()!.winner) }}
-        </span>
+      <div class="modal-hero" [style.--map-bg]="'url(/map_icons/' + selectedRound()!.map_name + '.png)'">
+        <div class="modal-hero-overlay">
+          <h2>{{ selectedRound()!.map_name || 'Unbekannte Map' }}</h2>
+          <span class="modal-winner" [ngClass]="getWinnerClass(selectedRound()!.winner)">
+            {{ getWinnerLabel(selectedRound()!.winner) }}
+          </span>
+        </div>
       </div>
 
       <div class="modal-meta">
-        <span>⏱️ Dauer: {{ formatDuration(selectedRound()!.duration) }}</span>
-        <span>📅 {{ formatTimestamp(selectedRound()!.timestamp) }}</span>
+        <span><svg lucideClock [size]="16"></svg> Dauer: {{ formatDuration(selectedRound()!.duration) }}</span>
+        <span><svg lucideCalendar [size]="16"></svg> {{ formatTimestamp(selectedRound()!.timestamp) }}</span>
       </div>
 
       <!-- Players Tab -->
       <div class="modal-section">
-        <h3>👥 Spieler ({{ selectedRound()!.players.length }})</h3>
+        <h3><svg lucideUsers [size]="20"></svg> Spieler ({{ selectedRound()!.players.length }})</h3>
         <div class="players-table">
           <div class="table-header">
             <span>Steam ID</span>
@@ -217,7 +219,7 @@
       <!-- Kills Tab -->
       @if (selectedRound()!.kills.length > 0) {
         <div class="modal-section">
-          <h3>💀 Kills ({{ selectedRound()!.kills.length }})</h3>
+          <h3><svg lucideSkull [size]="20"></svg> Kills ({{ selectedRound()!.kills.length }})</h3>
           <div class="kills-list">
             @for (kill of selectedRound()!.kills; track trackByKillIndex($index, kill)) {
               <div class="kill-item">
@@ -226,7 +228,7 @@
                   <small>{{ kill.attacker_role || '?' }}</small>
                 </span>
                 <span class="kill-arrow">
-                  {{ kill.headshot ? '🎯' : '→' }}
+                  @if (kill.headshot) { <svg lucideTarget [size]="16"></svg> } @else { → }
                 </span>
                 <span class="victim" [ngClass]="getRoleClass(kill.victim_role)">
                   {{ formatSteamId(kill.victim_steamid) }}
@@ -242,7 +244,7 @@
       <!-- Buys Tab -->
       @if (selectedRound()!.buys.length > 0) {
         <div class="modal-section">
-          <h3>🛒 Käufe ({{ selectedRound()!.buys.length }})</h3>
+          <h3><svg lucideShoppingCart [size]="20"></svg> Käufe ({{ selectedRound()!.buys.length }})</h3>
           <div class="buys-list">
             @for (buy of selectedRound()!.buys; track trackByBuyIndex($index, buy)) {
               <div class="buy-item">

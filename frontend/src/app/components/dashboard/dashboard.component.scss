@@ -1,5 +1,12 @@
 @use 'sass:color';
 
+// Lucide icon global styling
+svg[class*="lucide"] {
+  display: inline-block;
+  vertical-align: middle;
+  color: inherit;
+}
+
 // Variables mapped from CSS Variables for SCSS usage if needed
 $color-bg: #121214;
 $color-bg-card: #1e1e24;
@@ -256,7 +263,12 @@ $color-jester: var(--ttt-color-jester);
 }
 
 .round-card {
-  background: var(--ttt-bg-card);
+  background-color: var(--ttt-bg-card);
+  background-image: 
+    linear-gradient(to bottom, rgba(30, 30, 36, 0.3) 0%, rgba(30, 30, 36, 0.85) 45%, rgba(30, 30, 36, 1) 100%),
+    var(--map-bg, none);
+  background-size: cover;
+  background-position: top center;
   border: 1px solid var(--ttt-border-color);
   border-radius: var(--ttt-border-radius);
   padding: 1.25rem;
@@ -270,7 +282,7 @@ $color-jester: var(--ttt-color-jester);
   &:hover {
     transform: translateY(-2px);
     border-color: var(--ttt-text-secondary);
-    background: var(--ttt-bg-hover);
+    background-color: var(--ttt-bg-hover);
   }
 }
 
@@ -298,27 +310,39 @@ $color-jester: var(--ttt-color-jester);
   white-space: nowrap; // prevent breaking
 
   &.winner-traitor {
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--ttt-color-traitor);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
+    border: none;
   }
 
   &.winner-innocent {
-    background: rgba(34, 197, 94, 0.15);
-    color: var(--ttt-color-innocent);
-    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.9);
+    color: #fff;
+    border: none;
+  }
+  
+  &.winner-jackal {
+      background: rgba(12, 186, 186, 0.9);
+      color: #fff;
+      border: none;
+  }
+
+  &.winner-jester {
+      background: rgba(234, 179, 8, 0.9);
+      color: #fff;
+      border: none;
   }
   
   &.winner-other {
-      background: rgba(234, 179, 8, 0.15);
-      color: var(--ttt-color-jester);
-      border: 1px solid rgba(234, 179, 8, 0.3);
+      background: rgba(161, 161, 170, 0.9);
+      color: #fff;
+      border: none;
   }
   
   &.winner-timelimit {
-      background: rgba(161, 161, 170, 0.15);
-      color: var(--ttt-text-secondary);
-      border: 1px solid rgba(161, 161, 170, 0.3);
+      background: rgba(161, 161, 170, 0.9);
+      color: #fff;
+      border: none;
   }
 }
 
@@ -396,29 +420,53 @@ $color-jester: var(--ttt-color-jester);
   }
 }
 
-.modal-header {
-  padding: 2rem 2rem 1rem;
-  border-bottom: 1px solid var(--ttt-border-color);
+.modal-hero {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background-image:
+    var(--map-bg, none);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.modal-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(30, 30, 36, 0.2) 0%,
+    rgba(30, 30, 36, 0.6) 50%,
+    rgba(30, 30, 36, 0.95) 100%
+  );
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  padding: 1.5rem 2rem;
   gap: 1rem;
   
   h2 {
     font-size: 2rem;
     color: var(--ttt-text-primary);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    margin: 0;
   }
   
   .modal-winner {
-      // Reuse round-winner styles but bigger
       font-size: 1rem;
       font-weight: 700;
       padding: 0.4rem 1rem;
       border-radius: 4px;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      backdrop-filter: blur(4px);
 
-      &.winner-traitor { color: var(--ttt-color-traitor); background: rgba(239, 68, 68, 0.1); border: 1px solid var(--ttt-color-traitor); }
-      &.winner-innocent { color: var(--ttt-color-innocent); background: rgba(34, 197, 94, 0.1); border: 1px solid var(--ttt-color-innocent); }
+      &.winner-traitor { color: #fff; background: rgba(239, 68, 68, 0.85); }
+      &.winner-innocent { color: #fff; background: rgba(34, 197, 94, 0.85); }
+      &.winner-jackal { color: #fff; background: rgba(12, 186, 186, 0.85); }
+      &.winner-jester { color: #fff; background: rgba(234, 179, 8, 0.85); }
+      &.winner-timelimit, &.winner-other { color: #fff; background: rgba(161, 161, 170, 0.7); }
   }
 }
 
@@ -482,10 +530,12 @@ $color-jester: var(--ttt-color-jester);
 .role {
     font-weight: 500;
     
-    &.traitor { color: var(--ttt-color-traitor); }
-    &.innocent { color: var(--ttt-color-innocent); }
-    &.detective { color: var(--ttt-color-detective); }
-    &.jester { color: var(--ttt-color-jester); }
+    &.role-traitor { color: var(--ttt-color-traitor); }
+    &.role-innocent { color: var(--ttt-color-innocent); }
+    &.role-detective { color: var(--ttt-color-detective); }
+    &.role-jester { color: var(--ttt-color-jester); }
+    &.role-jackal { color: var(--ttt-color-jackal); }
+    &.role-sidekick { color: var(--ttt-color-sidekick); }
 }
 
 .karma, .points {
@@ -537,9 +587,11 @@ $color-jester: var(--ttt-color-jester);
         text-transform: uppercase;
     }
     
-    &.traitor { color: var(--ttt-color-traitor); }
-    &.innocent { color: var(--ttt-color-innocent); }
-    &.detective { color: var(--ttt-color-detective); }
+    &.role-traitor { color: var(--ttt-color-traitor); }
+    &.role-innocent { color: var(--ttt-color-innocent); }
+    &.role-detective { color: var(--ttt-color-detective); }
+    &.role-jackal { color: var(--ttt-color-jackal); }
+    &.role-sidekick { color: var(--ttt-color-sidekick); }
 }
 
 .kill-arrow {

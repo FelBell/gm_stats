@@ -1,14 +1,45 @@
-import { Component, signal, computed, linkedSignal } from '@angular/core';
+import { Component, signal, computed, linkedSignal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { httpResource } from '@angular/common/http';
 import { Round, Kill, RoundPlayer, RoundBuy, HealthResponse } from '../../models/stats.model';
 import { environment } from '../../../environments/environment';
+import {
+  LucideCrosshair,
+  LucideBarChart3,
+  LucideRefreshCw,
+  LucideGamepad2,
+  LucideSkull,
+  LucideTarget,
+  LucideTrophy,
+  LucideTriangleAlert,
+  LucideInbox,
+  LucideClock,
+  LucideCalendar,
+  LucideUsers,
+  LucideShoppingCart,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [
+    CommonModule,
+    RouterLink,
+    LucideCrosshair,
+    LucideBarChart3,
+    LucideRefreshCw,
+    LucideGamepad2,
+    LucideSkull,
+    LucideTarget,
+    LucideTrophy,
+    LucideTriangleAlert,
+    LucideInbox,
+    LucideClock,
+    LucideCalendar,
+    LucideUsers,
+    LucideShoppingCart,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -30,6 +61,7 @@ export class DashboardComponent {
     'STEAM_0:1:94263852': 'ben.liedel',
     'STEAM_0:0:624153889': 'Mink',
     'STEAM_0:0:638665069': 'soeren.hem',
+    'STEAM_0:1:597797310': 'Spinatlasagne',
   };
 
   // Pagination signals
@@ -100,6 +132,20 @@ export class DashboardComponent {
     return { innocent, traitor, other };
   });
 
+  constructor() {
+    effect(() => {
+      const rounds = this.rounds();
+      if (rounds.length > 0) {
+        const missingIds = Array.from(
+          new Set(rounds.flatMap((r) => r.players.map((p) => p.steam_id)))
+        ).filter((id) => id && !this.steamIdDisplayNames[id]);
+        if (missingIds.length > 0) {
+          console.log('Missing Steam IDs (Dashboard):', missingIds);
+        }
+      }
+    });
+  }
+
   loadMore(): void {
     this.currentPage.update((p) => p + 1);
   }
@@ -123,9 +169,13 @@ export class DashboardComponent {
     if (!role) return 'role-unknown';
     const normalized = role.toLowerCase();
 
+    // Detective gets its own color (dark blue)
+    if (normalized === 'detective') {
+      return 'role-detective';
+    }
     // Innocent team
     if (
-      ['innocent', 'detective', 'deputy', 'mercenary', 'glitch', 'phantom'].includes(normalized)
+      ['innocent', 'deputy', 'mercenary', 'glitch', 'phantom'].includes(normalized)
     ) {
       return 'role-innocent';
     }
@@ -148,6 +198,12 @@ export class DashboardComponent {
       return 'role-jester';
     }
     // Independent
+    if (['jackal'].includes(normalized)) {
+      return 'role-jackal';
+    }
+    if (['sidekick'].includes(normalized)) {
+      return 'role-sidekick';
+    }
     if (['killer', 'oldman', 'drunk', 'revenger'].includes(normalized)) {
       return 'role-independent';
     }
@@ -160,6 +216,12 @@ export class DashboardComponent {
         return 'winner-innocent';
       case 'traitors':
         return 'winner-traitor';
+      case 'jackals':
+      case 'jackal':
+        return 'winner-jackal';
+      case 'jester':
+      case 'jesters':
+        return 'winner-jester';
       case 'timelimit':
         return 'winner-timelimit';
       default:
@@ -173,6 +235,12 @@ export class DashboardComponent {
         return 'Innocents';
       case 'traitors':
         return 'Traitors';
+      case 'jackals':
+      case 'jackal':
+        return 'Jackals';
+      case 'jester':
+      case 'jesters':
+        return 'Jester';
       case 'timelimit':
         return 'Zeit abgelaufen';
       default:
