@@ -328,6 +328,37 @@
       </div>
     </section>
 
+    <!-- Fun Awards Section -->
+    <section class="awards-section">
+      <h2 class="section-title"><svg lucideTrophy [size]="22"></svg> Fun Awards</h2>
+      <div class="awards-grid">
+        @for (award of funAwards(); track award.title) {
+          <div class="award-card" [style.--award-color]="award.color">
+            <div class="award-icon-wrapper">
+              @if (award.icon === 'zap') { <svg lucideZap [size]="24"></svg> }
+              @if (award.icon === 'ghost') { <svg lucideGhost [size]="24"></svg> }
+              @if (award.icon === 'shopping-cart') { <svg lucideShoppingCart [size]="24"></svg> }
+              @if (award.icon === 'crosshair') { <svg lucideCrosshair [size]="24"></svg> }
+              @if (award.icon === 'wrench') { <svg lucideWrench [size]="24"></svg> }
+              @if (award.icon === 'heart-pulse') { <svg lucideHeartPulse [size]="24"></svg> }
+              @if (award.icon === 'smile') { <svg lucideSmile [size]="24"></svg> }
+            </div>
+            <div class="award-info">
+              <h3 class="award-title">{{ award.title }}</h3>
+              <div class="award-winner">{{ award.winner }}</div>
+              <div class="award-details">
+                <span class="award-value">{{ award.value }}</span>
+                <span class="award-desc">{{ award.description }}</span>
+              </div>
+            </div>
+          </div>
+        }
+        @if (funAwards().length === 0) {
+          <div class="pair-empty" style="grid-column: 1 / -1;">Nicht genug Daten für Awards</div>
+        }
+      </div>
+    </section>
+
     <!-- Player Pairs Section -->
     <section class="pairs-section">
       <h2 class="section-title"><svg lucideUsers [size]="22"></svg> Spieler-Paare</h2>

@@ -1002,6 +1002,108 @@ svg[class*="lucide"] {
   }
 }
 
+// ========== FUN AWARDS ==========
+.awards-section {
+  max-width: 1600px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
+.awards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.award-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: var(--ttt-bg-card);
+  border: 1px solid var(--ttt-border-color);
+  border-radius: var(--ttt-border-radius);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: var(--award-color);
+
+    .award-icon-wrapper {
+      transform: scale(1.1) rotate(5deg);
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--award-color);
+  }
+}
+
+.award-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--award-color);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.award-info {
+  flex: 1;
+  min-width: 0; // prevent overflow
+}
+
+.award-title {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ttt-text-secondary);
+  font-family: var(--ttt-font-heading);
+}
+
+.award-winner {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.award-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.award-value {
+  font-weight: 700;
+  color: var(--award-color);
+  font-size: 0.95rem;
+}
+
+.award-desc {
+  color: var(--ttt-text-secondary);
+  line-height: 1.3;
+}
+
 // Responsive
 @media (max-width: 768px) {
     .charts-grid {

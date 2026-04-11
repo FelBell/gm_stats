@@ -45,6 +45,12 @@ import {
   LucideMap,
   LucideFilter,
   LucideX,
+  LucideTrophy,
+  LucideZap,
+  LucideGhost,
+  LucideHeartPulse,
+  LucideWrench,
+  LucideSmile,
 } from '@lucide/angular';
 
 Chart.register(...registerables);
@@ -149,6 +155,12 @@ interface RivalryStats {
     LucideMap,
     LucideFilter,
     LucideX,
+    LucideTrophy,
+    LucideZap,
+    LucideGhost,
+    LucideHeartPulse,
+    LucideWrench,
+    LucideSmile,
   ],
   templateUrl: './statistics.component.html',
   styleUrl: './statistics.component.scss',
@@ -590,6 +602,221 @@ export class StatisticsComponent {
       .sort((a, b) => b.winRate - a.winRate || b.rounds - a.rounds)
       .slice(0, 5);
   }
+
+  // ========== FUN SUPERLATIVES / AWARDS ==========
+
+  funAwards = computed(() => {
+    const rounds = this.rounds();
+    const players = this.playerStats();
+    if (rounds.length === 0 || players.length === 0) return [];
+
+    const awards: {
+      icon: string;
+      title: string;
+      winner: string;
+      value: string;
+      description: string;
+      color: string;
+    }[] = [];
+
+    // 1. First Blood König — most first kills in rounds
+    const firstBloodCounts = new Map<string, number>();
+    rounds.forEach((round) => {
+      const firstKill = round.kills.find((k) => k.attacker_steamid);
+      if (firstKill?.attacker_steamid) {
+        firstBloodCounts.set(
+          firstKill.attacker_steamid,
+          (firstBloodCounts.get(firstKill.attacker_steamid) || 0) + 1,
+        );
+      }
+    });
+    if (firstBloodCounts.size > 0) {
+      const [steamId, count] = [...firstBloodCounts.entries()].sort(
+        (a, b) => b[1] - a[1],
+      )[0];
+      awards.push({
+        icon: 'zap',
+        title: 'First Blood König',
+        winner: this.getDisplayName(steamId),
+        value: `${count}x`,
+        description: 'Erster Kill der Runde',
+        color: '#f59e0b',
+      });
+    }
+
+    // 2. Weltuntergang — most deaths to world/environment (no attacker)
+    const worldDeathCounts = new Map<string, number>();
+    rounds.forEach((round) => {
+      round.kills.forEach((kill) => {
+        if (!kill.attacker_steamid && kill.victim_steamid) {
+          worldDeathCounts.set(
+            kill.victim_steamid,
+            (worldDeathCounts.get(kill.victim_steamid) || 0) + 1,
+          );
+        }
+      });
+    });
+    if (worldDeathCounts.size > 0) {
+      const [steamId, count] = [...worldDeathCounts.entries()].sort(
+        (a, b) => b[1] - a[1],
+      )[0];
+      awards.push({
+        icon: 'ghost',
+        title: 'Weltuntergang',
+        winner: this.getDisplayName(steamId),
+        value: `${count}x`,
+        description: 'Tod durch die Umgebung',
+        color: '#8b5cf6',
+      });
+    }
+
+    // 3. Shopaholic — most shop purchases per round
+    const buysPerPlayer = new Map<string, { buys: number; rounds: number }>();
+    rounds.forEach((round) => {
+      const playersInRound = new Set(round.players.map((p) => p.steam_id));
+      playersInRound.forEach((id) => {
+        if (!buysPerPlayer.has(id)) buysPerPlayer.set(id, { buys: 0, rounds: 0 });
+        buysPerPlayer.get(id)!.rounds++;
+      });
+      round.buys.forEach((buy) => {
+        if (!buysPerPlayer.has(buy.steam_id))
+          buysPerPlayer.set(buy.steam_id, { buys: 0, rounds: 0 });
+        buysPerPlayer.get(buy.steam_id)!.buys++;
+      });
+    });
+    const shoppers = [...buysPerPlayer.entries()]
+      .filter(([, data]) => data.rounds >= 10)
+      .map(([id, data]) => ({
+        id,
+        perRound: Math.round((data.buys / data.rounds) * 100) / 100,
+      }))
+      .sort((a, b) => b.perRound - a.perRound);
+    if (shoppers.length > 0) {
+      awards.push({
+        icon: 'shopping-cart',
+        title: 'Shopaholic',
+        winner: this.getDisplayName(shoppers[0].id),
+        value: `${shoppers[0].perRound}/Runde`,
+        description: 'Meiste Käufe pro Runde',
+        color: '#10b981',
+      });
+    }
+
+    // 4. One-Trick Pony — highest % of kills with a single weapon (min 20 kills)
+    const playerWeaponStats = new Map<
+      string,
+      { total: number; weapons: Map<string, number> }
+    >();
+    rounds.forEach((round) => {
+      round.kills.forEach((kill) => {
+        if (!kill.attacker_steamid) return;
+        if (!playerWeaponStats.has(kill.attacker_steamid)) {
+          playerWeaponStats.set(kill.attacker_steamid, {
+            total: 0,
+            weapons: new Map(),
+          });
+        }
+        const stats = playerWeaponStats.get(kill.attacker_steamid)!;
+        stats.total++;
+        const w = kill.weapon || 'Unbekannt';
+        stats.weapons.set(w, (stats.weapons.get(w) || 0) + 1);
+      });
+    });
+    const oneTricks = [...playerWeaponStats.entries()]
+      .filter(([, s]) => s.total >= 20)
+      .map(([id, s]) => {
+        const topWeapon = [...s.weapons.entries()].sort((a, b) => b[1] - a[1])[0];
+        return {
+          id,
+          weapon: topWeapon[0],
+          pct: Math.round((topWeapon[1] / s.total) * 1000) / 10,
+        };
+      })
+      .sort((a, b) => b.pct - a.pct);
+    if (oneTricks.length > 0) {
+      awards.push({
+        icon: 'crosshair',
+        title: 'One-Trick Pony',
+        winner: this.getDisplayName(oneTricks[0].id),
+        value: `${oneTricks[0].pct}%`,
+        description: `${oneTricks[0].weapon}`,
+        color: '#ef4444',
+      });
+    }
+
+    // 5. Waffensammler — most different weapons used for kills (min 15 kills)
+    const collectors = [...playerWeaponStats.entries()]
+      .filter(([, s]) => s.total >= 15)
+      .map(([id, s]) => ({ id, weaponCount: s.weapons.size, totalKills: s.total }))
+      .sort((a, b) => b.weaponCount - a.weaponCount);
+    if (collectors.length > 0) {
+      awards.push({
+        icon: 'wrench',
+        title: 'Waffensammler',
+        winner: this.getDisplayName(collectors[0].id),
+        value: `${collectors[0].weaponCount} Waffen`,
+        description: 'Verschiedene Waffen benutzt',
+        color: '#06b6d4',
+      });
+    }
+
+    // 6. Überlebenskünstler — lowest death rate (min 15 rounds)
+    const survivors = [...players]
+      .filter((p) => p.roundsPlayed >= 15)
+      .map((p) => ({
+        name: p.displayName,
+        deathRate: Math.round((p.deaths / p.roundsPlayed) * 100) / 100,
+      }))
+      .sort((a, b) => a.deathRate - b.deathRate);
+    if (survivors.length > 0) {
+      awards.push({
+        icon: 'heart-pulse',
+        title: 'Überlebenskünstler',
+        winner: survivors[0].name,
+        value: `${survivors[0].deathRate}/Runde`,
+        description: 'Niedrigste Todesrate',
+        color: '#ec4899',
+      });
+    }
+
+    // 7. Pazifist — most rounds with 0 kills
+    const roundsWithZeroKills = new Map<string, { zeroKillRounds: number; total: number }>();
+    rounds.forEach((round) => {
+      const killersInRound = new Set(
+        round.kills.filter((k) => k.attacker_steamid).map((k) => k.attacker_steamid!),
+      );
+      round.players.forEach((player) => {
+        if (!roundsWithZeroKills.has(player.steam_id)) {
+          roundsWithZeroKills.set(player.steam_id, { zeroKillRounds: 0, total: 0 });
+        }
+        const data = roundsWithZeroKills.get(player.steam_id)!;
+        data.total++;
+        if (!killersInRound.has(player.steam_id)) {
+          data.zeroKillRounds++;
+        }
+      });
+    });
+    const pacifists = [...roundsWithZeroKills.entries()]
+      .filter(([, d]) => d.total >= 15)
+      .map(([id, d]) => ({
+        id,
+        pct: Math.round((d.zeroKillRounds / d.total) * 1000) / 10,
+        count: d.zeroKillRounds,
+      }))
+      .sort((a, b) => b.pct - a.pct);
+    if (pacifists.length > 0) {
+      awards.push({
+        icon: 'smile',
+        title: 'Pazifist',
+        winner: this.getDisplayName(pacifists[0].id),
+        value: `${pacifists[0].pct}%`,
+        description: `${pacifists[0].count} Runden ohne Kill`,
+        color: '#a3e635',
+      });
+    }
+
+    return awards;
+  });
 
   // Average round duration
   avgRoundDuration = computed(() => {
